@@ -1,0 +1,17 @@
+<nav class="navbar">
+  <div class="navbar__brand">
+    <a routerLink="/">Library Management</a>
+  </div>
+
+  <div class="navbar__links">
+    <a routerLink="/">Home</a>
+    <a routerLink="/catalog">Catalog</a>
+
+    <a *ngIf="!tokenService.isLoggedIn()" routerLink="/login">Login</a>
+    <a *ngIf="!tokenService.isLoggedIn()" routerLink="/register">Register</a>
+
+    <a *ngIf="tokenService.getUserRole() === 'ADMIN'" routerLink="/admin/dashboard">Dashboard</a>
+
+    <button *ngIf="tokenService.isLoggedIn()" (click)="logout()">Logout</button>
+  </div>
+</nav>

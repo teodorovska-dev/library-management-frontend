@@ -1,0 +1,19 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  border-bottom: 1px solid #ddd;
+
+  &__brand a,
+  &__links a,
+  &__links button {
+    margin-left: 16px;
+    text-decoration: none;
+    color: #111;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+  }
+}

@@ -1,0 +1,16 @@
+<section class="dashboard">
+  <h1>Admin Dashboard</h1>
+  <p>Manage books and monitor your library system.</p>
+
+  <div class="dashboard__cards">
+    <div class="dashboard__card">
+      <h3>Total Books</h3>
+      <p>{{ totalBooks }}</p>
+    </div>
+  </div>
+
+  <div class="dashboard__actions">
+    <button (click)="navigateToAddBook()">Add New Book</button>
+    <button routerLink="/catalog">View Catalog</button>
+  </div>
+</section>

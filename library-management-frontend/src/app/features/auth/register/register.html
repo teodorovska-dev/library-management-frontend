@@ -1,0 +1,26 @@
+<section class="auth-page">
+  <h1>Create Account</h1>
+  <p>Register to access the library management system.</p>
+
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <input type="text" placeholder="Full Name" formControlName="fullName" />
+    <input type="email" placeholder="Email" formControlName="email" />
+    <input type="password" placeholder="Password" formControlName="password" />
+
+    <select formControlName="role" (change)="onRoleChange()">
+      <option value="USER">User</option>
+      <option value="ADMIN">Administrator</option>
+    </select>
+
+    <input
+      *ngIf="isAdminSelected"
+      type="text"
+      placeholder="Admin Access Key"
+      formControlName="adminAccessKey"
+    />
+
+    <button type="submit">Create Account</button>
+  </form>
+
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+</section>

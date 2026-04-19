@@ -1,0 +1,27 @@
+<section class="book-details" *ngIf="!isLoading && book">
+  <div class="book-details__image">
+    <img [src]="book.coverImageUrl || 'https://via.placeholder.com/250'" alt="Book cover" />
+  </div>
+
+  <div class="book-details__content">
+    <h1>{{ book.title }}</h1>
+    <p><strong>Author:</strong> {{ book.authorSurname }} {{ book.authorInitials }}</p>
+    <p><strong>Publication year:</strong> {{ book.publicationYear }}</p>
+    <p><strong>Genre:</strong> {{ book.genre || 'Not specified' }}</p>
+    <p><strong>Language:</strong> {{ book.language || 'Not specified' }}</p>
+    <p><strong>Publisher:</strong> {{ book.publisher || 'Not specified' }}</p>
+    <p><strong>ISBN:</strong> {{ book.isbn || 'Not specified' }}</p>
+    <p><strong>Copies:</strong> {{ book.copiesCount }}</p>
+    <p><strong>Status:</strong> {{ book.status }}</p>
+    <p><strong>Description:</strong> {{ book.description || 'No description available.' }}</p>
+
+    <div class="book-details__actions">
+      <button routerLink="/catalog">Back to catalog</button>
+      <button *ngIf="tokenService.getUserRole() === 'ADMIN'" (click)="goToEdit()">Edit book</button>
+    </div>
+  </div>
+</section>
+
+<section *ngIf="isLoading">
+  Loading book details...
+</section>

@@ -1,0 +1,25 @@
+<section class="book-form-page" *ngIf="!isLoading">
+  <h1>Edit Book</h1>
+  <p>Update book information in the library system.</p>
+
+  <form [formGroup]="bookForm" (ngSubmit)="onSubmit()">
+    <input type="text" placeholder="Title" formControlName="title" />
+    <input type="text" placeholder="Author surname" formControlName="authorSurname" />
+    <input type="text" placeholder="Author initials" formControlName="authorInitials" />
+    <input type="number" placeholder="Publication year" formControlName="publicationYear" />
+    <input type="number" placeholder="Copies count" formControlName="copiesCount" />
+    <input type="text" placeholder="Genre" formControlName="genre" />
+    <input type="text" placeholder="Language" formControlName="language" />
+    <input type="text" placeholder="ISBN" formControlName="isbn" />
+    <input type="text" placeholder="Publisher" formControlName="publisher" />
+    <input type="text" placeholder="Cover image URL" formControlName="coverImageUrl" />
+    <textarea placeholder="Description" formControlName="description"></textarea>
+
+    <div class="actions">
+      <button type="submit">Save Changes</button>
+      <button type="button" class="danger" (click)="onWriteOff()">Write Off Book</button>
+    </div>
+  </form>
+
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+</section>

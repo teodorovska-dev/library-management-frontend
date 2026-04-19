@@ -1,0 +1,71 @@
+.catalog {
+  padding: 40px;
+
+  &__header {
+    margin-bottom: 24px;
+  }
+
+  &__filters {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+
+    input,
+    select,
+    button {
+      padding: 12px 14px;
+      font-size: 14px;
+      border-radius: 10px;
+      border: 1px solid #d9d9d9;
+    }
+  }
+
+  &__pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  &__state {
+    margin-top: 20px;
+    font-size: 16px;
+  }
+}
+
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.book-card {
+  border: 1px solid #ddd;
+  padding: 16px;
+  border-radius: 12px;
+  transition: 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+
+  img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    margin-bottom: 12px;
+    border-radius: 8px;
+  }
+
+  .badge {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 12px;
+    background: #eee;
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+}

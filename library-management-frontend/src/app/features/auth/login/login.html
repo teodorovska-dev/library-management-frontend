@@ -1,0 +1,12 @@
+<section class="auth-page">
+  <h1>Welcome Back</h1>
+  <p>Sign in to access your library system.</p>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <input type="email" placeholder="Email" formControlName="email" />
+    <input type="password" placeholder="Password" formControlName="password" />
+    <button type="submit">Sign In</button>
+  </form>
+
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+</section>
