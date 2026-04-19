@@ -1,17 +1,27 @@
 <nav class="navbar">
-  <div class="navbar__brand">
-    <a routerLink="/">Library Management</a>
-  </div>
+  <div class="navbar__inner">
+    <a class="navbar__brand" routerLink="/">LIBRARY SYSTEM</a>
 
-  <div class="navbar__links">
-    <a routerLink="/">Home</a>
-    <a routerLink="/catalog">Catalog</a>
+    <div class="navbar__center">
+      <a routerLink="/catalog" class="navbar__link">CATALOG</a>
+      <a routerLink="/about" class="navbar__link">ABOUT US</a>
+      <a routerLink="/trending-books" class="navbar__link">TRENDING BOOKS</a>
+      <a routerLink="/contact" class="navbar__link">CONTACT</a>
+    </div>
 
-    <a *ngIf="!tokenService.isLoggedIn()" routerLink="/login">Login</a>
-    <a *ngIf="!tokenService.isLoggedIn()" routerLink="/register">Register</a>
+    <div class="navbar__actions" *ngIf="!tokenService.isLoggedIn()">
+      <a routerLink="/login" class="navbar__button navbar__button--outline">SIGN IN</a>
+      <a routerLink="/register" class="navbar__button navbar__button--filled">REGISTER</a>
+    </div>
 
-    <a *ngIf="tokenService.getUserRole() === 'ADMIN'" routerLink="/admin/dashboard">Dashboard</a>
-
-    <button *ngIf="tokenService.isLoggedIn()" (click)="logout()">Logout</button>
+    <div class="navbar__profile" *ngIf="tokenService.isLoggedIn()">
+      <button type="button" class="navbar__profile-button" (click)="goToProfile()" aria-label="Open profile">
+        <img
+          src="assets/icons/user-circle.svg"
+          alt="Profile"
+          class="navbar__profile-icon"
+        />
+      </button>
+    </div>
   </div>
 </nav>

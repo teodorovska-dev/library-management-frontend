@@ -11,6 +11,7 @@ import { EditBookComponent } from './features/admin/edit-book/edit-book';
 import { authGuard } from './core/guards/auth-guard';
 
 
+
 export const appRoutes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
@@ -19,6 +20,9 @@ export const appRoutes: Routes = [
   { path: 'books/:id', component: BookDetailsComponent },
   { path: 'admin/dashboard', component: DashboardComponent, canActivate: [adminGuard] },
   { path: 'admin/books/add', component: AddBookComponent, canActivate: [adminGuard] },
-  { path: 'admin/books/edit/:id', component: EditBookComponent, canActivate: [adminGuard] },
+  { path: 'about', component: HomeComponent }, 
+  { path: 'trending-books', component: HomeComponent },
+  { path: 'contact', component: HomeComponent },
+  { path: 'profile', component: HomeComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '' }
 ];
