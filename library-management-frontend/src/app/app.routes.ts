@@ -9,6 +9,7 @@ import { BookDetailsComponent } from './features/books/book-details/book-details
 import { AddBookComponent } from './features/admin/add-book/add-book';
 import { EditBookComponent } from './features/admin/edit-book/edit-book';
 import { authGuard } from './core/guards/auth-guard';
+import { RoleSelectionComponent } from './features/auth/role-selection/role-selection';
 
 
 
@@ -24,5 +25,6 @@ export const appRoutes: Routes = [
   { path: 'trending-books', component: HomeComponent },
   { path: 'contact', component: HomeComponent },
   { path: 'profile', component: HomeComponent, canActivate: [authGuard] },
+  { path: 'auth/select-role', component: RoleSelectionComponent },
   { path: '**', redirectTo: '' }
 ];

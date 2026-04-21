@@ -1,0 +1,119 @@
+<section class="role-selection-page">
+  <div class="role-selection-page__left">
+    <div class="role-selection-page__inner">
+      <div class="role-selection-page__brand">
+        LIBRARY SYSTEM
+      </div>
+
+      <div class="role-selection-page__header">
+        <h1>WELCOME TO LIBRARY SYSTEM</h1>
+        <p>Join our library community and discover a world of books.</p>
+      </div>
+
+      <div class="role-selection-page__roles">
+        <!-- USER -->
+        <div class="role-row role-row--user">
+          <button
+            type="button"
+            class="role-card role-card--light"
+            (click)="selectRole('USER')"
+          >
+            <img
+              src="assets/images/auth/splash-user.svg"
+              class="role-card__splash"
+              alt=""
+            />
+            <span class="role-card__label">USER</span>
+          </button>
+
+          <img
+            src="assets/images/auth/arrow-left.svg"
+            class="role-arrow"
+            alt=""
+          />
+
+          <div class="role-text role-text--user">
+            <img
+              src="assets/images/auth/user-icon.svg"
+              class="role-text__icon"
+              alt=""
+            />
+            <p>
+              Looking for books to<br />
+              read and manage<br />
+              your personal<br />
+              library experience?
+            </p>
+          </div>
+        </div>
+
+        <!-- ADMIN -->
+        <div class="role-row role-row--admin">
+          <div class="role-text role-text--admin">
+            <img
+              src="assets/images/auth/admin-icon.svg"
+              class="role-text__icon"
+              alt=""
+            />
+            <p>
+              Responsible for<br />
+              managing the library<br />
+              collection and system<br />
+              content?
+            </p>
+          </div>
+
+          <img
+            src="assets/images/auth/arrow-right.svg"
+            class="role-arrow"
+            alt=""
+          />
+
+          <button
+            type="button"
+            class="role-card role-card--dark"
+            (click)="selectRole('ADMIN')"
+          >
+            <img
+              src="assets/images/auth/splash-admin.svg"
+              class="role-card__splash"
+              alt=""
+            />
+            <span class="role-card__label">ADMIN</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="role-selection-page__right">
+    <img
+      src="assets/images/auth/login-library-bg.png"
+      alt="Library interior"
+      class="role-selection-page__background"
+    />
+
+    <div class="role-selection-page__overlay"></div>
+
+    <div class="role-selection-page__overlay-content">
+      <h2>
+        READ.<br />
+        DISCOVER.<br />
+        GROW.
+      </h2>
+
+      <div class="role-selection-page__line"></div>
+
+      <p>
+        A modern way to explore your <br />
+        personal library.
+      </p>
+    </div>
+  </div>
+
+  <img
+    src="assets/images/auth/top-splash.svg"
+    class="top-splash"
+    alt=""
+  />
+</section>

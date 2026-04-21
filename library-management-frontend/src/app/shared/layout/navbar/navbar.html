@@ -11,7 +11,7 @@
 
     <div class="navbar__actions" *ngIf="!tokenService.isLoggedIn()">
       <a routerLink="/login" class="navbar__button navbar__button--outline">SIGN IN</a>
-      <a routerLink="/register" class="navbar__button navbar__button--filled">REGISTER</a>
+      <a routerLink="/auth/select-role" class="navbar__button navbar__button--filled">REGISTER</a>
     </div>
 
     <div class="navbar__profile" *ngIf="tokenService.isLoggedIn()">
