@@ -1,12 +1,146 @@
-<section class="auth-page">
-  <h1>Welcome Back</h1>
-  <p>Sign in to access your library system.</p>
+<section class="login-page">
+  <div class="login-page__left">
+    <div class="login-page__inner">
+      <div class="login-page__brand">LIBRARY SYSTEM</div>
 
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-    <input type="email" placeholder="Email" formControlName="email" />
-    <input type="password" placeholder="Password" formControlName="password" />
-    <button type="submit">Sign In</button>
-  </form>
+      <div class="login-page__form-wrapper">
+        <div class="login-page__header">
+          <h1>WELCOME BACK!</h1>
+          <p>
+            Secure access to your digital library. Manage books, track inventory, and
+            maintain your collection efficiently.
+          </p>
+        </div>
 
-  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+        <div class="social-login">
+          <button type="button" class="social-login__btn">
+            <img src="assets/images/auth/google-icon.svg" alt="Google" />
+            <span>Google</span>
+          </button>
+
+          <button type="button" class="social-login__btn">
+            <img src="assets/images/auth/apple-icon.svg" alt="Apple" />
+            <span>Apple</span>
+          </button>
+        </div>
+
+        <div class="divider">
+          <span></span>
+          <p>or</p>
+          <span></span>
+        </div>
+
+        <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="login-form__group">
+            <label for="email">Email</label>
+
+            <div
+              class="login-form__input-wrapper"
+              [class.login-form__input-wrapper--error]="isEmailInvalid"
+            >
+              <img
+                src="assets/images/auth/mail-icon.svg"
+                alt=""
+                [class.login-form__icon--error]="isEmailInvalid"
+              />
+
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                [placeholder]="isEmailInvalid ? 'Please enter a valid email address' : 'Enter your email'"
+                [class.login-form__input--error]="isEmailInvalid"
+              />
+            </div>
+
+            <p class="login-form__error-text" *ngIf="isEmailInvalid">
+              {{ getEmailErrorMessage() }}
+            </p>
+          </div>
+
+          <div class="login-form__group">
+            <label for="password">Password</label>
+
+            <div
+              class="login-form__input-wrapper"
+              [class.login-form__input-wrapper--error]="isPasswordInvalid"
+            >
+              <img
+                src="assets/images/auth/lock-icon.svg"
+                alt=""
+                [class.login-form__icon--error]="isPasswordInvalid"
+              />
+
+              <input
+                id="password"
+                type="password"
+                formControlName="password"
+                [placeholder]="isPasswordInvalid ? 'Please enter your password' : 'Enter your password'"
+                [class.login-form__input--error]="isPasswordInvalid"
+              />
+            </div>
+
+            <p class="login-form__error-text" *ngIf="isPasswordInvalid">
+              {{ getPasswordErrorMessage() }}
+            </p>
+          </div>
+
+          <div class="login-form__options">
+            <label class="remember-me">
+              <input type="checkbox" />
+              <span>Remember for 30 days</span>
+            </label>
+
+            <a routerLink="/forgot-password" class="forgot-password">
+              Forgot password?
+            </a>
+          </div>
+
+          <p class="login-form__server-error" *ngIf="errorMessage">
+            {{ errorMessage }}
+          </p>
+
+          <button type="submit" class="login-form__submit">
+            CONTINUE
+          </button>
+        </form>
+
+        <div class="login-page__footer">
+          <span>Don’t have an account?</span>
+          <a routerLink="/auth/select-role">Register</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-page__right">
+    <img
+      src="assets/images/auth/login-library-bg.png"
+      alt="Library interior"
+      class="login-page__background"
+    />
+
+    <div class="login-page__overlay"></div>
+
+    <div class="login-page__overlay-content">
+      <h2>
+        READ.<br />
+        DISCOVER.<br />
+        GROW.
+      </h2>
+
+      <div class="login-page__line"></div>
+
+      <p>
+        A modern way to explore your <br />
+        personal library.
+      </p>
+    </div>
+  </div>
+
+  <img
+    src="assets/images/auth/top-splash.svg"
+    class="top-splash"
+    alt=""
+  />
 </section>
