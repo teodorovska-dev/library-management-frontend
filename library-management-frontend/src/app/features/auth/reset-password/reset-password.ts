@@ -9,7 +9,8 @@ import {
   ValidatorFn,
   Validators
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-reset-password',
@@ -21,12 +22,16 @@ import { Router, RouterLink } from '@angular/router';
 export class ResetPasswordComponent {
   resetPasswordForm: FormGroup;
   errorMessage = '';
+  isSubmitting = false;
 
-  private readonly mockOldPassword = 'OldPassword123!';
+  private email = '';
+  private code = '';
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
+    private authService: AuthService
   ) {
     this.resetPasswordForm = this.fb.group(
       {
@@ -44,6 +49,9 @@ export class ResetPasswordComponent {
         validators: [this.passwordsMatchValidator()]
       }
     );
+
+    this.email = this.route.snapshot.queryParamMap.get('email') || '';
+    this.code = this.route.snapshot.queryParamMap.get('code') || '';
   }
 
   get isNewPasswordInvalid(): boolean {
@@ -114,14 +122,33 @@ export class ResetPasswordComponent {
       return;
     }
 
-    const newPassword = this.resetPasswordForm.get('newPassword')?.value;
-
-    if (newPassword === this.mockOldPassword) {
-      this.errorMessage = 'Your new password cannot be the same as your old password.';
+    if (!this.email || !this.code) {
+      this.errorMessage = 'Password reset session is invalid or expired. Please restart the process.';
       return;
     }
 
-    this.router.navigate(['/password-changed']);
+    const newPassword = this.resetPasswordForm.get('newPassword')?.value;
+
+    this.isSubmitting = true;
+
+    this.authService.resetPassword({
+      email: this.email,
+      code: this.code,
+      newPassword
+    }).subscribe({
+      next: () => {
+        this.router.navigate(['/password-changed']);
+      },
+      error: (err) => {
+        this.errorMessage =
+          err?.error?.message ||
+          'Unable to reset password. Please try again.';
+        this.isSubmitting = false;
+      },
+      complete: () => {
+        this.isSubmitting = false;
+      }
+    });
   }
 
   private passwordStrengthValidator(): ValidatorFn {

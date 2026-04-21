@@ -1,7 +1,20 @@
-import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnDestroy,
+  QueryList,
+  ViewChildren
+} from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-verify-code',
@@ -10,19 +23,30 @@ import { ActivatedRoute, Router } from '@angular/router';
   templateUrl: './verify-code.html',
   styleUrls: ['./verify-code.scss'],
 })
-export class VerifyCodeComponent {
+export class VerifyCodeComponent implements AfterViewInit, OnDestroy {
   @ViewChildren('codeInput') codeInputs!: QueryList<ElementRef<HTMLInputElement>>;
 
   verifyCodeForm: FormGroup;
+
   errorMessage = '';
   resendMessage = '';
-  maskedEmail = 'aaa.....t@gmail.com';
-  codeControls = ['digit1', 'digit2', 'digit3', 'digit4'];
+
+  maskedEmail = '';
+  email = '';
+
+  isSubmitting = false;
+  isResending = false;
+
+  resendCooldown = 0;
+  private resendIntervalId: ReturnType<typeof setInterval> | null = null;
+
+  readonly codeControls = ['digit1', 'digit2', 'digit3', 'digit4'];
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authService: AuthService
   ) {
     this.verifyCodeForm = this.fb.group({
       digit1: ['', [Validators.required, Validators.pattern(/^[0-9]$/)]],
@@ -32,14 +56,26 @@ export class VerifyCodeComponent {
     });
 
     const emailFromQuery = this.route.snapshot.queryParamMap.get('email');
+
     if (emailFromQuery) {
+      this.email = emailFromQuery;
       this.maskedEmail = this.maskEmail(emailFromQuery);
     }
   }
 
+  ngAfterViewInit(): void {
+    this.focusInput(0);
+  }
+
+  ngOnDestroy(): void {
+    this.clearCooldownTimer();
+  }
+
   get isCodeInvalid(): boolean {
     return this.verifyCodeForm.invalid &&
-      Object.values(this.verifyCodeForm.controls).some(control => control.touched || control.dirty);
+      Object.values(this.verifyCodeForm.controls).some(
+        control => control.touched || control.dirty
+      );
   }
 
   getCodeErrorMessage(): string {
@@ -69,7 +105,8 @@ export class VerifyCodeComponent {
   onPaste(event: ClipboardEvent): void {
     event.preventDefault();
 
-    const pastedText = event.clipboardData?.getData('text')?.replace(/\D/g, '').slice(0, 4) || '';
+    const pastedText =
+      event.clipboardData?.getData('text')?.replace(/\D/g, '').slice(0, 4) || '';
 
     pastedText.split('').forEach((digit, index) => {
       if (this.codeControls[index]) {
@@ -77,13 +114,43 @@ export class VerifyCodeComponent {
       }
     });
 
-    const targetIndex = Math.min(pastedText.length, this.codeControls.length - 1);
+    const targetIndex = Math.min(
+      pastedText.length,
+      this.codeControls.length - 1
+    );
     this.focusInput(targetIndex);
   }
 
   onResendCode(): void {
-    this.resendMessage = 'A new verification email has been sent.';
     this.errorMessage = '';
+    this.resendMessage = '';
+
+    if (this.resendCooldown > 0) {
+      return;
+    }
+
+    if (!this.email) {
+      this.errorMessage = 'Email is missing. Please try again.';
+      return;
+    }
+
+    this.isResending = true;
+
+    this.authService.forgotPassword({ email: this.email }).subscribe({
+      next: (response) => {
+        this.resendMessage = response.message;
+        this.startCooldown();
+      },
+      error: (err) => {
+        this.errorMessage =
+          err?.error?.message ||
+          'Unable to resend the verification code.';
+        this.isResending = false;
+      },
+      complete: () => {
+        this.isResending = false;
+      }
+    });
   }
 
   onSubmit(): void {
@@ -94,16 +161,36 @@ export class VerifyCodeComponent {
       return;
     }
 
-    const code = this.codeControls
-      .map(controlName => this.verifyCodeForm.get(controlName)?.value)
-      .join('');
-
-    if (code === '2222') {
-      this.router.navigate(['/reset-password']);
+    if (!this.email) {
+      this.errorMessage = 'Session expired. Please start again.';
       return;
     }
 
-    this.errorMessage = 'The verification code is incorrect.';
+    const code = this.codeControls
+      .map(c => this.verifyCodeForm.get(c)?.value)
+      .join('');
+
+    this.isSubmitting = true;
+
+    this.authService.verifyResetCode({ email: this.email, code }).subscribe({
+      next: () => {
+        this.router.navigate(['/reset-password'], {
+          queryParams: {
+            email: this.email,
+            code
+          }
+        });
+      },
+      error: (err) => {
+        this.errorMessage =
+          err?.error?.message ||
+          'Invalid or expired verification code.';
+        this.isSubmitting = false;
+      },
+      complete: () => {
+        this.isSubmitting = false;
+      }
+    });
   }
 
   private focusInput(index: number): void {
@@ -114,6 +201,26 @@ export class VerifyCodeComponent {
     }
   }
 
+  private startCooldown(): void {
+    this.clearCooldownTimer();
+    this.resendCooldown = 60;
+
+    this.resendIntervalId = setInterval(() => {
+      this.resendCooldown--;
+
+      if (this.resendCooldown <= 0) {
+        this.clearCooldownTimer();
+      }
+    }, 1000);
+  }
+
+  private clearCooldownTimer(): void {
+    if (this.resendIntervalId) {
+      clearInterval(this.resendIntervalId);
+      this.resendIntervalId = null;
+    }
+  }
+
   private maskEmail(email: string): string {
     const [name, domain] = email.split('@');
 
@@ -121,9 +228,6 @@ export class VerifyCodeComponent {
       return email;
     }
 
-    const firstPart = name.slice(0, 3);
-    const lastPart = name.slice(-1);
-
-    return `${firstPart}.....${lastPart}@${domain}`;
+    return `${name.slice(0, 3)}.....${name.slice(-1)}@${domain}`;
   }
 }

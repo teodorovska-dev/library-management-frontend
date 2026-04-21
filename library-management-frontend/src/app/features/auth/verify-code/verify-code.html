@@ -9,7 +9,7 @@
           <p>
             Please enter the code we sent to
             <span class="highlight-email">{{ maskedEmail }}</span>
-        </p>
+          </p>
         </div>
 
         <form class="verify-code-form" [formGroup]="verifyCodeForm" (ngSubmit)="onSubmit()">
@@ -21,7 +21,7 @@
               inputmode="numeric"
               maxlength="1"
               class="verify-code-form__code-box"
-              [class.verify-code-form__code-box--error]="isCodeInvalid"
+              [class.verify-code-form__code-box--error]="isCodeInvalid || !!errorMessage"
               [formControlName]="control"
               (input)="onCodeInput($event, i)"
               (keydown)="onKeyDown($event, i)"
@@ -37,15 +37,30 @@
             {{ errorMessage }}
           </p>
 
-          <button type="submit" class="verify-code-form__submit">
-            CONTINUE
+          <button
+            type="submit"
+            class="verify-code-form__submit"
+            [disabled]="isSubmitting"
+          >
+            {{ isSubmitting ? 'VERIFYING...' : 'CONTINUE' }}
           </button>
         </form>
 
         <div class="verify-code-page__footer">
           <span>Didn’t get?</span>
-          <button type="button" class="verify-code-page__resend-btn" (click)="onResendCode()">
-            Send me a new email
+          <button
+            type="button"
+            class="verify-code-page__resend-btn"
+            (click)="onResendCode()"
+            [disabled]="isResending || resendCooldown > 0"
+          >
+            {{
+              isResending
+                ? 'Sending...'
+                : resendCooldown > 0
+                ? 'Resend in ' + resendCooldown + 's'
+                : 'Send me a new email'
+            }}
           </button>
         </div>
 
