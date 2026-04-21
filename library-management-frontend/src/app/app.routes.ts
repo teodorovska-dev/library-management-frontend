@@ -10,7 +10,10 @@ import { AddBookComponent } from './features/admin/add-book/add-book';
 import { EditBookComponent } from './features/admin/edit-book/edit-book';
 import { authGuard } from './core/guards/auth-guard';
 import { RoleSelectionComponent } from './features/auth/role-selection/role-selection';
-
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password';
+import { VerifyCodeComponent } from './features/auth/verify-code/verify-code';
+import { ResetPasswordComponent } from './features/auth/reset-password/reset-password';
+import { PasswordChangedComponent } from './features/auth/password-changed/password-changed';
 
 
 export const appRoutes: Routes = [
@@ -26,5 +29,9 @@ export const appRoutes: Routes = [
   { path: 'contact', component: HomeComponent },
   { path: 'profile', component: HomeComponent, canActivate: [authGuard] },
   { path: 'auth/select-role', component: RoleSelectionComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'verify-code', component: VerifyCodeComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
+  { path: 'password-changed', component: PasswordChangedComponent },
   { path: '**', redirectTo: '' }
 ];

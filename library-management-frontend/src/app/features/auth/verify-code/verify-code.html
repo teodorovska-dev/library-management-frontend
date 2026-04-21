@@ -1,0 +1,89 @@
+<section class="verify-code-page">
+  <div class="verify-code-page__left">
+    <div class="verify-code-page__inner">
+      <div class="verify-code-page__brand">LIBRARY SYSTEM</div>
+
+      <div class="verify-code-page__form-wrapper">
+        <div class="verify-code-page__header">
+          <h1>FORGOT PASSWORD?</h1>
+          <p>
+            Please enter the code we sent to
+            <span class="highlight-email">{{ maskedEmail }}</span>
+        </p>
+        </div>
+
+        <form class="verify-code-form" [formGroup]="verifyCodeForm" (ngSubmit)="onSubmit()">
+          <div class="verify-code-form__code-inputs">
+            <input
+              #codeInput
+              *ngFor="let control of codeControls; let i = index"
+              type="text"
+              inputmode="numeric"
+              maxlength="1"
+              class="verify-code-form__code-box"
+              [class.verify-code-form__code-box--error]="isCodeInvalid"
+              [formControlName]="control"
+              (input)="onCodeInput($event, i)"
+              (keydown)="onKeyDown($event, i)"
+              (paste)="onPaste($event)"
+            />
+          </div>
+
+          <p class="verify-code-form__error-text" *ngIf="isCodeInvalid">
+            {{ getCodeErrorMessage() }}
+          </p>
+
+          <p class="verify-code-form__server-error" *ngIf="errorMessage">
+            {{ errorMessage }}
+          </p>
+
+          <button type="submit" class="verify-code-form__submit">
+            CONTINUE
+          </button>
+        </form>
+
+        <div class="verify-code-page__footer">
+          <span>Didn’t get?</span>
+          <button type="button" class="verify-code-page__resend-btn" (click)="onResendCode()">
+            Send me a new email
+          </button>
+        </div>
+
+        <p class="verify-code-page__resend-message" *ngIf="resendMessage">
+          {{ resendMessage }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="verify-code-page__right">
+    <img
+      src="assets/images/auth/login-library-bg.png"
+      alt="Library interior"
+      class="verify-code-page__background"
+    />
+
+    <div class="verify-code-page__overlay"></div>
+
+    <div class="verify-code-page__overlay-content">
+      <h2>
+        READ.<br />
+        DISCOVER.<br />
+        GROW.
+      </h2>
+
+      <div class="verify-code-page__line"></div>
+
+      <p>
+        A modern way to explore your <br />
+        personal library.
+      </p>
+    </div>
+  </div>
+
+  <img
+    src="assets/images/auth/top-splash.svg"
+    class="top-splash"
+    alt=""
+  />
+</section>
