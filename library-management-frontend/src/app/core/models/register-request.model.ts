@@ -1,7 +1,9 @@
 export interface RegisterRequest {
-  fullName: string;
+  firstName: string;
+  lastName: string;
+  username: string;
   email: string;
   password: string;
-  role: string;
+  role: 'USER' | 'ADMIN';
   adminAccessKey?: string;
 }

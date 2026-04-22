@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-register-user',
@@ -15,7 +16,11 @@ export class RegisterUserComponent {
   errorMessage = '';
   isSubmitting = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.registerForm = this.fb.group({
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
@@ -53,79 +58,38 @@ export class RegisterUserComponent {
 
   getFirstNameErrorMessage(): string {
     const control = this.registerForm.get('firstName');
-
-    if (!control) {
-      return '';
-    }
-
-    if (control.hasError('required')) {
-      return 'Name is required.';
-    }
-
+    if (!control) return '';
+    if (control.hasError('required')) return 'Name is required.';
     return '';
   }
 
   getLastNameErrorMessage(): string {
     const control = this.registerForm.get('lastName');
-
-    if (!control) {
-      return '';
-    }
-
-    if (control.hasError('required')) {
-      return 'Surname is required.';
-    }
-
+    if (!control) return '';
+    if (control.hasError('required')) return 'Surname is required.';
     return '';
   }
 
   getUsernameErrorMessage(): string {
     const control = this.registerForm.get('username');
-
-    if (!control) {
-      return '';
-    }
-
-    if (control.hasError('required')) {
-      return 'Username is required.';
-    }
-
+    if (!control) return '';
+    if (control.hasError('required')) return 'Username is required.';
     return '';
   }
 
   getEmailErrorMessage(): string {
     const control = this.registerForm.get('email');
-
-    if (!control) {
-      return '';
-    }
-
-    if (control.hasError('required')) {
-      return 'Email is required.';
-    }
-
-    if (control.hasError('email')) {
-      return 'Please enter a valid email address.';
-    }
-
+    if (!control) return '';
+    if (control.hasError('required')) return 'Email is required.';
+    if (control.hasError('email')) return 'Please enter a valid email address.';
     return '';
   }
 
   getPasswordErrorMessage(): string {
     const control = this.registerForm.get('password');
-
-    if (!control) {
-      return '';
-    }
-
-    if (control.hasError('required')) {
-      return 'Password is required.';
-    }
-
-    if (control.hasError('minlength')) {
-      return 'Password must contain at least 8 characters.';
-    }
-
+    if (!control) return '';
+    if (control.hasError('required')) return 'Password is required.';
+    if (control.hasError('minlength')) return 'Password must contain at least 8 characters.';
     return '';
   }
 
@@ -139,9 +103,32 @@ export class RegisterUserComponent {
 
     this.isSubmitting = true;
 
-    setTimeout(() => {
-      this.isSubmitting = false;
-      console.log('Register user form value:', this.registerForm.getRawValue());
-    }, 500);
+    const formValue = this.registerForm.getRawValue();
+
+    this.authService.register({
+      firstName: formValue.firstName.trim(),
+      lastName: formValue.lastName.trim(),
+      username: formValue.username.trim(),
+      email: formValue.email.trim().toLowerCase(),
+      password: formValue.password,
+      role: 'USER'
+    }).subscribe({
+      next: (response) => {
+        if (response.role === 'ADMIN') {
+          this.router.navigate(['/admin/dashboard']);
+        } else {
+          this.router.navigate(['/catalog']);
+        }
+      },
+      error: (err) => {
+        this.errorMessage =
+          err?.error?.message ||
+          'Unable to complete registration. Please try again.';
+        this.isSubmitting = false;
+      },
+      complete: () => {
+        this.isSubmitting = false;
+      }
+    });
   }
 }
