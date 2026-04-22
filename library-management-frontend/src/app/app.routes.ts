@@ -14,6 +14,8 @@ import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-
 import { VerifyCodeComponent } from './features/auth/verify-code/verify-code';
 import { ResetPasswordComponent } from './features/auth/reset-password/reset-password';
 import { PasswordChangedComponent } from './features/auth/password-changed/password-changed';
+import { RegisterUserComponent } from './features/auth/register-user/register-user';
+import { RegisterAdminComponent } from './features/auth/register-admin/register-admin';
 
 
 export const appRoutes: Routes = [
@@ -33,5 +35,7 @@ export const appRoutes: Routes = [
   { path: 'verify-code', component: VerifyCodeComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'password-changed', component: PasswordChangedComponent },
+  { path: 'register/user', component: RegisterUserComponent },
+  { path: 'register/admin', component: RegisterAdminComponent },
   { path: '**', redirectTo: '' }
 ];

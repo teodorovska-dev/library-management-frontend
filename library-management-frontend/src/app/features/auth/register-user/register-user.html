@@ -1,0 +1,229 @@
+<section class="register-user-page">
+  <div class="register-user-page__left">
+    <div class="register-user-page__inner">
+      <div class="register-user-page__brand">LIBRARY SYSTEM</div>
+
+      <div class="register-user-page__form-wrapper">
+        <div class="register-user-page__header">
+          <h1>GET STARTED NOW</h1>
+          <p>
+            Secure access to your digital library, manage books, track inventory, and
+            maintain your collection efficiently.
+          </p>
+        </div>
+
+        <div class="social-login">
+          <button type="button" class="social-login__btn">
+            <img src="assets/images/auth/google-icon.svg" alt="Google" />
+            <span>Google</span>
+          </button>
+
+          <button type="button" class="social-login__btn">
+            <img src="assets/images/auth/apple-icon.svg" alt="Apple" />
+            <span>Apple</span>
+          </button>
+        </div>
+
+        <div class="divider">
+          <span></span>
+          <p>or</p>
+          <span></span>
+        </div>
+
+        <form class="register-form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          <div class="register-form__row">
+            <div class="register-form__group">
+              <label for="firstName">Name</label>
+
+              <div
+                class="register-form__input-wrapper"
+                [class.register-form__input-wrapper--error]="isFirstNameInvalid"
+              >
+                <img
+                  src="assets/images/auth/name-icon.svg"
+                  alt=""
+                  [class.register-form__icon--error]="isFirstNameInvalid"
+                />
+
+                <input
+                  id="firstName"
+                  type="text"
+                  formControlName="firstName"
+                  [placeholder]="isFirstNameInvalid ? 'Please enter your name' : 'Enter your name'"
+                  [class.register-form__input--error]="isFirstNameInvalid"
+                />
+              </div>
+
+              <p class="register-form__error-text" *ngIf="isFirstNameInvalid">
+                {{ getFirstNameErrorMessage() }}
+              </p>
+            </div>
+
+            <div class="register-form__group">
+              <label for="lastName">Surname</label>
+
+              <div
+                class="register-form__input-wrapper"
+                [class.register-form__input-wrapper--error]="isLastNameInvalid"
+              >
+                <img
+                  src="assets/images/auth/name-icon.svg"
+                  alt=""
+                  [class.register-form__icon--error]="isLastNameInvalid"
+                />
+
+                <input
+                  id="lastName"
+                  type="text"
+                  formControlName="lastName"
+                  [placeholder]="isLastNameInvalid ? 'Please enter your surname' : 'Enter your surname'"
+                  [class.register-form__input--error]="isLastNameInvalid"
+                />
+              </div>
+
+              <p class="register-form__error-text" *ngIf="isLastNameInvalid">
+                {{ getLastNameErrorMessage() }}
+              </p>
+            </div>
+          </div>
+
+          <div class="register-form__group">
+            <label for="username">Username</label>
+
+            <div
+              class="register-form__input-wrapper"
+              [class.register-form__input-wrapper--error]="isUsernameInvalid"
+            >
+              <img
+                src="assets/images/auth/user-icon-2.svg"
+                alt=""
+                [class.register-form__icon--error]="isUsernameInvalid"
+              />
+
+              <input
+                id="username"
+                type="text"
+                formControlName="username"
+                [placeholder]="isUsernameInvalid ? 'Please enter your username' : 'Enter your username'"
+                [class.register-form__input--error]="isUsernameInvalid"
+              />
+            </div>
+
+            <p class="register-form__error-text" *ngIf="isUsernameInvalid">
+              {{ getUsernameErrorMessage() }}
+            </p>
+          </div>
+
+          <div class="register-form__group">
+            <label for="email">Email</label>
+
+            <div
+              class="register-form__input-wrapper"
+              [class.register-form__input-wrapper--error]="isEmailInvalid"
+            >
+              <img
+                src="assets/images/auth/mail-icon.svg"
+                alt=""
+                [class.register-form__icon--error]="isEmailInvalid"
+              />
+
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                [placeholder]="isEmailInvalid ? 'Please enter a valid email address' : 'Enter your email'"
+                [class.register-form__input--error]="isEmailInvalid"
+              />
+            </div>
+
+            <p class="register-form__error-text" *ngIf="isEmailInvalid">
+              {{ getEmailErrorMessage() }}
+            </p>
+          </div>
+
+          <div class="register-form__group">
+            <label for="password">Password</label>
+
+            <div
+              class="register-form__input-wrapper"
+              [class.register-form__input-wrapper--error]="isPasswordInvalid"
+            >
+              <img
+                src="assets/images/auth/lock-icon.svg"
+                alt=""
+                [class.register-form__icon--error]="isPasswordInvalid"
+              />
+
+              <input
+                id="password"
+                type="password"
+                formControlName="password"
+                [placeholder]="isPasswordInvalid ? 'Please enter a stronger password' : 'Enter your password'"
+                [class.register-form__input--error]="isPasswordInvalid"
+              />
+            </div>
+
+            <p class="register-form__error-text" *ngIf="isPasswordInvalid">
+              {{ getPasswordErrorMessage() }}
+            </p>
+          </div>
+
+          <div class="register-form__options">
+            <label class="remember-me">
+              <input type="checkbox" formControlName="rememberMe" />
+              <span>Remember for 30 days</span>
+            </label>
+          </div>
+
+          <p class="register-form__server-error" *ngIf="errorMessage">
+            {{ errorMessage }}
+          </p>
+
+          <button
+            type="submit"
+            class="register-form__submit"
+            [disabled]="isSubmitting"
+          >
+            {{ isSubmitting ? 'PROCESSING...' : 'CONTINUE' }}
+          </button>
+        </form>
+
+        <div class="register-user-page__footer">
+          <span>Have an account?</span>
+          <a routerLink="/login">Sign in</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="register-user-page__right">
+    <img
+      src="assets/images/auth/login-library-bg.png"
+      alt="Library interior"
+      class="register-user-page__background"
+    />
+
+    <div class="register-user-page__overlay"></div>
+
+    <div class="register-user-page__overlay-content">
+      <h2>
+        READ.<br />
+        DISCOVER.<br />
+        GROW.
+      </h2>
+
+      <div class="register-user-page__line"></div>
+
+      <p>
+        A modern way to explore your <br />
+        personal library.
+      </p>
+    </div>
+  </div>
+
+  <img
+    src="assets/images/auth/top-splash.svg"
+    class="top-splash"
+    alt=""
+  />
+</section>

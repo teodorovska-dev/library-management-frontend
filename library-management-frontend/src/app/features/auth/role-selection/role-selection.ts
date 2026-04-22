@@ -5,14 +5,17 @@ import { Router } from '@angular/router';
   selector: 'app-role-selection',
   standalone: true,
   templateUrl: './role-selection.html',
-  styleUrl: './role-selection.scss'
+  styleUrls: ['./role-selection.scss']
 })
 export class RoleSelectionComponent {
   constructor(private router: Router) {}
 
   selectRole(role: 'USER' | 'ADMIN'): void {
-    this.router.navigate(['/register'], {
-      queryParams: { role }
-    });
+    if (role === 'USER') {
+      this.router.navigate(['/register/user']);
+      return;
+    }
+
+    this.router.navigate(['/register/admin']);
   }
 }
