@@ -1,6 +1,6 @@
 .navbar {
   width: 100%;
-  padding: 28px 44px;
+  padding: 36px 28px;
   background: transparent;
   border-bottom: none;
 
@@ -14,7 +14,7 @@
   }
 
   &__brand {
-    font-family: "Times New Roman", serif;
+    font-family: 'Abhaya Libre', serif;
     font-size: 24px;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -31,8 +31,9 @@
   }
 
   &__link {
-    font-size: 15px;
-    font-weight: 400;
+    font-family: 'Kanit', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
     color: #111111;
     text-decoration: none;
     letter-spacing: 0.01em;
@@ -51,11 +52,12 @@
 
   &__button {
     min-width: 112px;
-    height: 44px;
+    height: 40px;
     padding: 0 22px;
-    border-radius: 14px;
+    border-radius: 10px;
+    font-family: 'Kanit', sans-serif;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 300;
     text-decoration: none;
     display: inline-flex;
     align-items: center;

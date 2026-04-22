@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-role-selection',
   standalone: true,
+  imports: [RouterLink],
   templateUrl: './role-selection.html',
   styleUrls: ['./role-selection.scss']
 })

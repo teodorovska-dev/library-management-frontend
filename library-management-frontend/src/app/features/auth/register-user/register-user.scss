@@ -8,7 +8,7 @@
 
   &__left {
     position: relative;
-    background: #f7f7f5;
+    background: #ffffff;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -33,6 +33,9 @@
     font-weight: 700;
     color: #111111;
     letter-spacing: 0.01em;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
   }
 
   &__form-wrapper {
