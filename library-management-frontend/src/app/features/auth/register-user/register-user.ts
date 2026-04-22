@@ -27,7 +27,7 @@ export class RegisterUserComponent {
       username: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-      rememberMe: [false]
+      rememberMe: [true]
     });
   }
 
@@ -59,6 +59,7 @@ export class RegisterUserComponent {
   getFirstNameErrorMessage(): string {
     const control = this.registerForm.get('firstName');
     if (!control) return '';
+    if (control.hasError('backend')) return control.getError('backend');
     if (control.hasError('required')) return 'Name is required.';
     return '';
   }
@@ -66,6 +67,7 @@ export class RegisterUserComponent {
   getLastNameErrorMessage(): string {
     const control = this.registerForm.get('lastName');
     if (!control) return '';
+    if (control.hasError('backend')) return control.getError('backend');
     if (control.hasError('required')) return 'Surname is required.';
     return '';
   }
@@ -73,6 +75,7 @@ export class RegisterUserComponent {
   getUsernameErrorMessage(): string {
     const control = this.registerForm.get('username');
     if (!control) return '';
+    if (control.hasError('backend')) return control.getError('backend');
     if (control.hasError('required')) return 'Username is required.';
     return '';
   }
@@ -80,6 +83,7 @@ export class RegisterUserComponent {
   getEmailErrorMessage(): string {
     const control = this.registerForm.get('email');
     if (!control) return '';
+    if (control.hasError('backend')) return control.getError('backend');
     if (control.hasError('required')) return 'Email is required.';
     if (control.hasError('email')) return 'Please enter a valid email address.';
     return '';
@@ -88,6 +92,7 @@ export class RegisterUserComponent {
   getPasswordErrorMessage(): string {
     const control = this.registerForm.get('password');
     if (!control) return '';
+    if (control.hasError('backend')) return control.getError('backend');
     if (control.hasError('required')) return 'Password is required.';
     if (control.hasError('minlength')) return 'Password must contain at least 8 characters.';
     return '';
@@ -95,6 +100,7 @@ export class RegisterUserComponent {
 
   onSubmit(): void {
     this.errorMessage = '';
+    this.clearBackendErrors();
 
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
@@ -112,7 +118,7 @@ export class RegisterUserComponent {
       email: formValue.email.trim().toLowerCase(),
       password: formValue.password,
       role: 'USER'
-    }).subscribe({
+    }, formValue.rememberMe).subscribe({
       next: (response) => {
         if (response.role === 'ADMIN') {
           this.router.navigate(['/admin/dashboard']);
@@ -121,14 +127,44 @@ export class RegisterUserComponent {
         }
       },
       error: (err) => {
-        this.errorMessage =
-          err?.error?.message ||
-          'Unable to complete registration. Please try again.';
+        const validationErrors = err?.error?.validationErrors;
+
+        if (validationErrors) {
+          this.applyBackendValidationErrors(validationErrors);
+          this.errorMessage = err?.error?.message || 'Validation error occurred.';
+        } else {
+          this.errorMessage =
+            err?.error?.message ||
+            'Unable to complete registration. Please try again.';
+        }
+
         this.isSubmitting = false;
       },
       complete: () => {
         this.isSubmitting = false;
       }
+    });
+  }
+
+  private applyBackendValidationErrors(errors: Record<string, string>): void {
+    Object.entries(errors).forEach(([field, message]) => {
+      const control = this.registerForm.get(field);
+      if (control) {
+        control.setErrors({ ...(control.errors || {}), backend: message });
+        control.markAsTouched();
+      }
+    });
+  }
+
+  private clearBackendErrors(): void {
+    ['firstName', 'lastName', 'username', 'email', 'password'].forEach(field => {
+      const control = this.registerForm.get(field);
+      if (!control?.errors?.['backend']) {
+        return;
+      }
+
+      const { backend, ...remainingErrors } = control.errors || {};
+      control.setErrors(Object.keys(remainingErrors).length ? remainingErrors : null);
     });
   }
 }

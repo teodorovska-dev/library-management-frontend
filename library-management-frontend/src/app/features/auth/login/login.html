@@ -87,7 +87,7 @@
 
           <div class="login-form__options">
             <label class="remember-me">
-              <input type="checkbox" />
+              <input type="checkbox" formControlName="rememberMe" />
               <span>Remember for 30 days</span>
             </label>
 
@@ -100,8 +100,8 @@
             {{ errorMessage }}
           </p>
 
-          <button type="submit" class="login-form__submit">
-            CONTINUE
+          <button type="submit" class="login-form__submit" [disabled]="isSubmitting">
+            {{ isSubmitting ? 'SIGNING IN...' : 'CONTINUE' }}
           </button>
         </form>
 

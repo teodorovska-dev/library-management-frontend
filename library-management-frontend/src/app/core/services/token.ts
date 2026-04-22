@@ -8,10 +8,15 @@ import { User } from '../models/user.model';
 export class TokenService {
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'auth_user';
+  private readonly STORAGE_MODE_KEY = 'auth_storage_mode';
 
-  saveAuthData(authResponse: AuthResponse): void {
-    localStorage.setItem(this.TOKEN_KEY, authResponse.token);
-    localStorage.setItem(
+  saveAuthData(authResponse: AuthResponse, rememberMe: boolean = true): void {
+    const storage = rememberMe ? localStorage : sessionStorage;
+
+    this.clear();
+
+    storage.setItem(this.TOKEN_KEY, authResponse.token);
+    storage.setItem(
       this.USER_KEY,
       JSON.stringify({
         userId: authResponse.userId,
@@ -20,14 +25,17 @@ export class TokenService {
         role: authResponse.role
       })
     );
+
+    localStorage.setItem(this.STORAGE_MODE_KEY, rememberMe ? 'local' : 'session');
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    return localStorage.getItem(this.TOKEN_KEY) || sessionStorage.getItem(this.TOKEN_KEY);
   }
 
   getUser(): User | null {
-    const userJson = localStorage.getItem(this.USER_KEY);
+    const userJson =
+      localStorage.getItem(this.USER_KEY) || sessionStorage.getItem(this.USER_KEY);
 
     if (!userJson) {
       return null;
@@ -52,5 +60,9 @@ export class TokenService {
   clear(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem(this.STORAGE_MODE_KEY);
+
+    sessionStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.USER_KEY);
   }
 }

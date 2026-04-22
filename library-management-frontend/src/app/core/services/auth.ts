@@ -37,15 +37,15 @@ export class AuthService {
     private tokenService: TokenService
   ) {}
 
-  register(request: RegisterRequest): Observable<AuthResponse> {
+  register(request: RegisterRequest, rememberMe: boolean = true): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, request).pipe(
-      tap(response => this.tokenService.saveAuthData(response))
+      tap(response => this.tokenService.saveAuthData(response, rememberMe))
     );
   }
 
-  login(request: LoginRequest): Observable<AuthResponse> {
+  login(request: LoginRequest, rememberMe: boolean = true): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, request).pipe(
-      tap(response => this.tokenService.saveAuthData(response))
+      tap(response => this.tokenService.saveAuthData(response, rememberMe))
     );
   }
 
