@@ -1,8 +1,8 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, Router, UrlTree } from '@angular/router';
 import { TokenService } from '../services/token';
 
-export const adminGuard: CanActivateFn = () => {
+export const adminGuard: CanActivateFn = (): boolean | UrlTree => {
   const tokenService = inject(TokenService);
   const router = inject(Router);
 
@@ -12,6 +12,5 @@ export const adminGuard: CanActivateFn = () => {
     return true;
   }
 
-  router.navigate(['/']);
-  return false;
+  return router.createUrlTree(['/']);
 };
