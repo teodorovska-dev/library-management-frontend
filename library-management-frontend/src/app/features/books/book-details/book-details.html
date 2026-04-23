@@ -1,27 +1,242 @@
-<section class="book-details" *ngIf="!isLoading && book">
-  <div class="book-details__image">
-    <img [src]="book.coverImageUrl || 'https://via.placeholder.com/250'" alt="Book cover" />
-  </div>
+<section class="book-details-page">
+  <div class="book-details-page__hero">
+    <div class="book-details-page__hero-inner">
+      <nav class="book-details-page__breadcrumbs" aria-label="Breadcrumb">
+        <a routerLink="/">Home</a>
+        <span>/</span>
+        <a routerLink="/catalog">Catalog</a>
+        <span>/</span>
+        <span>{{ book().breadcrumbTitle }}</span>
+      </nav>
 
-  <div class="book-details__content">
-    <h1>{{ book.title }}</h1>
-    <p><strong>Author:</strong> {{ book.authorSurname }} {{ book.authorInitials }}</p>
-    <p><strong>Publication year:</strong> {{ book.publicationYear }}</p>
-    <p><strong>Genre:</strong> {{ book.genre || 'Not specified' }}</p>
-    <p><strong>Language:</strong> {{ book.language || 'Not specified' }}</p>
-    <p><strong>Publisher:</strong> {{ book.publisher || 'Not specified' }}</p>
-    <p><strong>ISBN:</strong> {{ book.isbn || 'Not specified' }}</p>
-    <p><strong>Copies:</strong> {{ book.copiesCount }}</p>
-    <p><strong>Status:</strong> {{ book.status }}</p>
-    <p><strong>Description:</strong> {{ book.description || 'No description available.' }}</p>
+      <div class="book-details-page__hero-grid">
+        <div class="book-details-page__hero-content">
+          <h1>DISCOVER EVERY DETAIL OF THIS BOOK</h1>
 
-    <div class="book-details__actions">
-      <button routerLink="/catalog">Back to catalog</button>
-      <button *ngIf="tokenService.getUserRole() === 'ADMIN'" (click)="goToEdit()">Edit book</button>
+          <p>
+            Access complete book information, monitor availability, and explore
+            the essential details of this title in a clean and structured interface
+          </p>
+
+          <button
+            type="button"
+            class="book-details-page__hero-link"
+            (click)="onScrollToDetails()"
+          >
+            <span class="book-details-page__hero-link-text">ABOUT BOOK</span>
+            <span class="book-details-page__hero-link-circle">→</span>
+          </button>
+        </div>
+
+        <div class="book-details-page__hero-visual">
+          <div class="book-details-page__pink-splash"></div>
+
+          <div class="book-details-page__cover-frame">
+            <img
+              [src]="book().coverImage"
+              [alt]="book().title + ' cover'"
+              class="book-details-page__cover-image"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</section>
 
-<section *ngIf="isLoading">
-  Loading book details...
+  <section id="about-book-section" class="about-book-section">
+    <div class="about-book-section__container">
+      <div class="about-book-section__header">
+        <h2>ABOUT THIS BOOK</h2>
+        <p>
+          Track the availability of this title and manage its library record
+          with clarity and precision.
+        </p>
+      </div>
+
+      <div class="about-book-section__top-grid">
+        <div class="about-book-section__description-block">
+          <h3>{{ book().title }}</h3>
+
+          <h4>
+            <span class="by-text">by</span>
+            {{ book().author }}
+          </h4>
+
+          <div class="about-book-section__description-text">
+            <p *ngFor="let paragraph of book().description.split('\n\n')">
+              {{ paragraph }}
+            </p>
+          </div>
+        </div>
+
+        <div class="about-book-section__divider"></div>
+
+        <div class="about-book-section__details-block">
+          <h3>BOOK DETAILS</h3>
+
+          <div class="about-book-section__details-list">
+            <div class="about-book-section__details-row">
+              <div class="detail-item">
+                <span class="detail-item__label">Editors</span>
+                <span class="detail-item__value">{{ book().editors }}</span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-item__label">Publisher</span>
+                <span class="detail-item__value">{{ book().publisher }}</span>
+              </div>
+            </div>
+
+            <div class="about-book-section__details-row">
+              <div class="detail-item">
+                <span class="detail-item__label">Format</span>
+                <span class="detail-item__value">{{ book().format }}</span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-item__label">Features</span>
+                <span class="detail-item__value">{{ book().features }}</span>
+              </div>
+            </div>
+
+            <div class="about-book-section__details-row">
+              <div class="detail-item">
+                <span class="detail-item__label">Category</span>
+                <span class="detail-item__value">{{ getCategoryLabel() }}</span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-item__label">Language</span>
+                <span class="detail-item__value">{{ getLanguageLabel() }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-book-section__stats-grid">
+        <article class="info-card">
+          <span class="info-card__title">PUBLICATION YEAR</span>
+          <span class="info-card__value">{{ book().publicationYear }}</span>
+        </article>
+
+        <article class="info-card">
+          <span class="info-card__title">AVAILABLE COPIES</span>
+          <span class="info-card__value">{{ book().availableCopies }}</span>
+        </article>
+
+        <article class="info-card">
+          <span class="info-card__title">ISBN</span>
+          <span class="info-card__value">{{ book().isbn }}</span>
+        </article>
+
+        <article class="info-card">
+          <span class="info-card__title">STATUS</span>
+          <span class="info-card__value">{{ book().status }}</span>
+        </article>
+      </div>
+
+      <div class="about-book-section__footer">
+        <div class="about-book-section__footer-actions" *ngIf="isUser() || isAdmin()">
+          
+          <!-- USER -->
+          <button
+            *ngIf="isUser()"
+            type="button"
+            class="footer-icon-button"
+            [class.footer-icon-button--active]="isSavedToFavorites()"
+            (click)="onToggleFavorite()"
+          >
+            <img
+              [src]="
+                isSavedToFavorites()
+                  ? 'assets/images/books/favorite-filled-icon.svg'
+                  : 'assets/images/books/favorite-outline-icon.svg'
+              "
+              alt=""
+            />
+          </button>
+
+          <!-- ADMIN -->
+          <ng-container *ngIf="isAdmin()">
+            <button
+              type="button"
+              class="footer-icon-button"
+              (click)="onEditBook()"
+            >
+              <img src="assets/images/books/edit-book-icon.svg" alt="" />
+            </button>
+
+            <span class="about-book-section__footer-divider"></span>
+
+            <button
+              type="button"
+              class="footer-icon-button footer-icon-button--danger"
+              (click)="onDeleteBook()"
+            >
+              <img src="assets/images/books/delete-book-icon.svg" alt="" />
+            </button>
+          </ng-container>
+        </div>
+
+        <span
+          class="about-book-section__footer-divider"
+          *ngIf="isUser() || isAdmin()"
+        ></span>
+
+        <button
+          type="button"
+          class="about-book-section__back-button"
+          (click)="onBackToCatalog()"
+        >
+          <span class="about-book-section__back-text">BACK TO CATALOG</span>
+          <span class="about-book-section__back-circle">→</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- DELETE MODAL -->
+  <div
+    class="book-details-modal-overlay"
+    *ngIf="activeModal() === 'delete-confirm'"
+  >
+    <div class="book-details-modal">
+      <button
+        type="button"
+        class="book-details-modal__close"
+        (click)="closeModal()"
+      >
+        ×
+      </button>
+
+      <div class="book-details-modal__icon">
+        <img src="assets/images/admin/trash-red-icon.svg" alt="" />
+      </div>
+
+      <p class="book-details-modal__message">
+        Are you sure you want to remove this book?
+      </p>
+
+      <div class="book-details-modal__divider"></div>
+
+      <div class="book-details-modal__actions">
+        <button
+          type="button"
+          class="book-details-modal__button book-details-modal__button--primary"
+          (click)="confirmDeleteBook()"
+        >
+          WRITE OFF
+        </button>
+
+        <button
+          type="button"
+          class="book-details-modal__button book-details-modal__button--secondary"
+          (click)="closeModal()"
+        >
+          CANCEL
+        </button>
+      </div>
+    </div>
+  </div>
 </section>
