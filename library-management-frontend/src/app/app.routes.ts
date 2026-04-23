@@ -26,6 +26,7 @@ export const appRoutes: Routes = [
   { path: 'books/:id', component: BookDetailsComponent },
   { path: 'admin/dashboard', component: DashboardComponent, canActivate: [adminGuard] },
   { path: 'admin/books/add', component: AddBookComponent, canActivate: [adminGuard] },
+  { path: 'admin/books/:id/edit', component: EditBookComponent, canActivate: [adminGuard] },
   { path: 'about', component: HomeComponent }, 
   { path: 'trending-books', component: HomeComponent },
   { path: 'contact', component: HomeComponent },

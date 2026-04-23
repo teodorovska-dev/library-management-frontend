@@ -1,22 +1,349 @@
-<section class="book-form-page">
-  <h1>Add New Book</h1>
-  <p>Create a new record in the library system.</p>
+<section class="add-book-page">
+  <div class="add-book-page__hero">
+    <div class="add-book-page__hero-content">
+      <h1>LIBRARY MANAGEMENT SYSTEM</h1>
+      <p>Book catalog management and library resource tracking</p>
+    </div>
+  </div>
 
-  <form [formGroup]="bookForm" (ngSubmit)="onSubmit()">
-    <input type="text" placeholder="Title" formControlName="title" />
-    <input type="text" placeholder="Author surname" formControlName="authorSurname" />
-    <input type="text" placeholder="Author initials" formControlName="authorInitials" />
-    <input type="number" placeholder="Publication year" formControlName="publicationYear" />
-    <input type="number" placeholder="Copies count" formControlName="copiesCount" />
-    <input type="text" placeholder="Genre" formControlName="genre" />
-    <input type="text" placeholder="Language" formControlName="language" />
-    <input type="text" placeholder="ISBN" formControlName="isbn" />
-    <input type="text" placeholder="Publisher" formControlName="publisher" />
-    <input type="text" placeholder="Cover image URL" formControlName="coverImageUrl" />
-    <textarea placeholder="Description" formControlName="description"></textarea>
+  <div class="add-book-page__container">
+    <div class="add-book-page__shell">
+      <div class="add-book-page__header">
+        <h2>ADD NEW BOOK</h2>
+        <p>Create a new record in the library system</p>
+      </div>
 
-    <button type="submit">Save Book</button>
-  </form>
+      <form
+        class="add-book-form"
+        [formGroup]="addBookForm"
+        (ngSubmit)="onSubmit()"
+      >
+        <div class="add-book-form__grid">
+          <div class="add-book-card add-book-card--left">
+            <div class="add-book-form__cover-and-basic">
+              <div class="add-book-form__cover-block">
+                <label class="add-book-form__label required">Upload book cover</label>
 
-  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+                <label class="cover-upload" for="coverInput">
+                  <input
+                    id="coverInput"
+                    type="file"
+                    accept="image/*"
+                    (change)="onCoverSelected($event)"
+                  />
+
+                  <ng-container *ngIf="!coverPreviewUrl; else coverPreview">
+                    <div class="cover-upload__placeholder">
+                      <img src="assets/images/admin/upload-icon.svg" alt="" />
+                      <span>Upload</span>
+                    </div>
+                  </ng-container>
+
+                  <ng-template #coverPreview>
+                    <img
+                      [src]="coverPreviewUrl!"
+                      alt="Book cover preview"
+                      class="cover-upload__preview"
+                    />
+                  </ng-template>
+                </label>
+
+                <p class="cover-upload__filename" *ngIf="selectedCoverName">
+                  {{ selectedCoverName }}
+                </p>
+              </div>
+
+              <div class="add-book-form__basic-fields">
+                <div class="add-book-form__group">
+                  <label for="title" class="required">Title</label>
+                  <div
+                    class="add-book-form__input-wrapper"
+                    [class.add-book-form__input-wrapper--error]="isTitleInvalid"
+                  >
+                    <img src="assets/images/admin/book-icon.svg" alt="" />
+                    <input
+                      id="title"
+                      type="text"
+                      formControlName="title"
+                      placeholder="Enter full title of new book"
+                    />
+                  </div>
+                </div>
+
+                <div class="add-book-form__group">
+                  <label for="author" class="required">Author</label>
+                  <div
+                    class="add-book-form__input-wrapper"
+                    [class.add-book-form__input-wrapper--error]="isAuthorInvalid"
+                  >
+                    <img src="assets/images/admin/book-icon.svg" alt="" />
+                    <input
+                      id="author"
+                      type="text"
+                      formControlName="author"
+                      placeholder="Enter author’s full name"
+                    />
+                  </div>
+                </div>
+
+                <div class="add-book-form__group">
+                  <label for="publisher" class="required">Publisher</label>
+                  <div
+                    class="add-book-form__input-wrapper"
+                    [class.add-book-form__input-wrapper--error]="isPublisherInvalid"
+                  >
+                    <img src="assets/images/admin/book-icon.svg" alt="" />
+                    <input
+                      id="publisher"
+                      type="text"
+                      formControlName="publisher"
+                      placeholder="Enter publisher of new book"
+                    />
+                  </div>
+                </div>
+
+                <div class="add-book-form__group">
+                  <label for="editors">Editors</label>
+                  <div class="add-book-form__input-wrapper">
+                    <img src="assets/images/admin/book-icon.svg" alt="" />
+                    <input
+                      id="editors"
+                      type="text"
+                      formControlName="editors"
+                      placeholder="Enter editors of new book"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="add-book-form__group add-book-form__group--description">
+              <label for="description" class="required">Description</label>
+              <div
+                class="add-book-form__textarea-wrapper"
+                [class.add-book-form__textarea-wrapper--error]="isDescriptionInvalid"
+              >
+                <textarea
+                  id="description"
+                  formControlName="description"
+                  placeholder="Enter description of new book"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="add-book-card add-book-card--right">
+            <div class="add-book-form__row add-book-form__row--two">
+              <div class="add-book-form__group">
+                <label for="publicationYear" class="required">Publication year</label>
+                <div
+                  class="add-book-form__input-wrapper"
+                  [class.add-book-form__input-wrapper--error]="isPublicationYearInvalid"
+                >
+                  <img src="assets/images/admin/book-icon.svg" alt="" />
+                  <input
+                    id="publicationYear"
+                    type="text"
+                    formControlName="publicationYear"
+                    placeholder="Enter publication year of new book"
+                  />
+                </div>
+              </div>
+
+              <div class="add-book-form__group">
+                <label for="isbn" class="required">ISBN</label>
+                <div
+                  class="add-book-form__input-wrapper"
+                  [class.add-book-form__input-wrapper--error]="isIsbnInvalid"
+                >
+                  <img src="assets/images/admin/book-icon.svg" alt="" />
+                  <input
+                    id="isbn"
+                    type="text"
+                    formControlName="isbn"
+                    placeholder="Enter ISBN of new book"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="add-book-form__row add-book-form__row--two">
+              <div class="add-book-form__group">
+                <label for="format" class="required">Format</label>
+                <div
+                  class="add-book-form__input-wrapper"
+                  [class.add-book-form__input-wrapper--error]="isFormatInvalid"
+                >
+                  <img src="assets/images/admin/book-icon.svg" alt="" />
+                  <input
+                    id="format"
+                    type="text"
+                    formControlName="format"
+                    placeholder="Enter format of new book"
+                  />
+                </div>
+              </div>
+
+              <div class="add-book-form__group">
+                <label for="features" class="required">Features</label>
+                <div
+                  class="add-book-form__input-wrapper"
+                  [class.add-book-form__input-wrapper--error]="isFeaturesInvalid"
+                >
+                  <img src="assets/images/admin/book-icon.svg" alt="" />
+                  <input
+                    id="features"
+                    type="text"
+                    formControlName="features"
+                    placeholder="Enter features of new book"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <app-multi-select
+              label="Languages"
+              [required]="true"
+              placeholder="Search for language"
+              hint="Select one or more languages"
+              [options]="languageOptions"
+              formControlName="languages"
+              [error]="isLanguagesInvalid"
+            ></app-multi-select>
+
+            <app-multi-select
+              label="Category"
+              [required]="true"
+              placeholder="Search for category"
+              hint="Select one or more categories"
+              [options]="categoryOptions"
+              formControlName="category"
+              [error]="isCategoryInvalid"
+            ></app-multi-select>
+
+            <div class="add-book-form__copies-row">
+              <label for="availableCopies" class="required">Available copies</label>
+
+              <div class="add-book-form__copies-input-block">
+                <span
+                  class="add-book-form__copies-helper"
+                  [class.add-book-form__copies-helper--hidden]="addBookForm.get('availableCopies')?.value"
+                >
+                  Enter number of available copies
+                </span>
+
+                <div
+                  class="add-book-form__underline-input"
+                  [class.add-book-form__underline-input--error]="isAvailableCopiesInvalid"
+                >
+                  <input
+                    id="availableCopies"
+                    type="number"
+                    min="1"
+                    formControlName="availableCopies"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="add-book-form__actions">
+          <button
+            type="submit"
+            class="add-book-form__action add-book-form__action--primary"
+            [disabled]="isSubmitting"
+          >
+            {{ isSubmitting ? 'SAVING...' : 'SAVE' }}
+          </button>
+
+          <button
+            type="button"
+            class="add-book-form__action add-book-form__action--secondary"
+            (click)="onClear()"
+          >
+            CLEAR
+          </button>
+
+          <button
+            type="button"
+            class="add-book-form__action add-book-form__action--secondary"
+            (click)="onCancel()"
+          >
+            CANCEL
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="add-book-modal-overlay" *ngIf="activeModal">
+    <div
+      class="add-book-modal add-book-modal--compact"
+      *ngIf="activeModal === 'validation-error'"
+    >
+      <button
+        type="button"
+        class="add-book-modal__close"
+        (click)="closeModal()"
+        aria-label="Close modal"
+      >
+        ×
+      </button>
+
+      <div class="add-book-modal__icon add-book-modal__icon--error">
+        <img src="assets/images/admin/error-red-icon.svg" alt="" />
+      </div>
+
+      <p class="add-book-modal__message">
+        Please fill in required fields!
+      </p>
+
+      <div class="add-book-modal__divider"></div>
+
+      <div class="add-book-modal__actions">
+        <button
+          type="button"
+          class="add-book-modal__button add-book-modal__button--primary"
+          (click)="closeModal()"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="add-book-modal add-book-modal--compact"
+      *ngIf="activeModal === 'success'"
+    >
+      <button
+        type="button"
+        class="add-book-modal__close"
+        (click)="closeModal()"
+        aria-label="Close modal"
+      >
+        ×
+      </button>
+
+      <div class="add-book-modal__icon add-book-modal__icon--success">
+        <img src="assets/images/admin/check-green-icon.svg" alt="" />
+      </div>
+
+      <p class="add-book-modal__message">
+        Book has been successfully added
+      </p>
+
+      <div class="add-book-modal__divider"></div>
+
+      <div class="add-book-modal__actions">
+        <button
+          type="button"
+          class="add-book-modal__button add-book-modal__button--primary"
+          (click)="onSuccessOk()"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
 </section>

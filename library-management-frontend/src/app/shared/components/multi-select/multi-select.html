@@ -1,0 +1,98 @@
+<div class="multi-select">
+  <label class="multi-select__label" *ngIf="label">
+    {{ label }}<span *ngIf="required" class="multi-select__required"> *</span>
+  </label>
+
+  <div
+    class="multi-select__trigger"
+    [class.multi-select__trigger--open]="isOpen"
+    [class.multi-select__trigger--filled]="selectedCount > 0"
+    [class.multi-select__trigger--error]="error"
+    [class.multi-select__trigger--disabled]="disabled"
+    (click)="toggleDropdown()"
+  >
+    <input
+      type="text"
+      class="multi-select__search-input"
+      [(ngModel)]="searchTerm"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      (click)="$event.stopPropagation()"
+      (focus)="isOpen = true"
+    />
+
+    <div class="multi-select__right">
+      <button
+        *ngIf="selectedCount > 0"
+        type="button"
+        class="multi-select__count-badge"
+        (click)="$event.stopPropagation()"
+      >
+        <span class="multi-select__count-number">{{ selectedCount }}</span>
+
+        <span
+          class="multi-select__count-clear"
+          (click)="clearSelection($event)"
+        >
+          ×
+        </span>
+      </button>
+
+      <img
+        src="assets/images/admin/chevron-down.svg"
+        alt=""
+        class="multi-select__chevron"
+        [class.multi-select__chevron--open]="isOpen"
+      />
+    </div>
+  </div>
+
+  <div
+    class="multi-select__dropdown"
+    *ngIf="isOpen"
+    [style.maxHeight.px]="maxDropdownHeight"
+  >
+    <button
+      type="button"
+      class="multi-select__option multi-select__option--select-all"
+      (click)="toggleSelectAll()"
+    >
+      <span
+        class="multi-select__checkbox"
+        [class.multi-select__checkbox--checked]="allSelected"
+        [class.multi-select__checkbox--partial]="someSelected"
+      >
+        <span class="multi-select__checkbox-icon" *ngIf="allSelected">✓</span>
+        <span class="multi-select__checkbox-icon" *ngIf="someSelected && !allSelected">−</span>
+      </span>
+
+      <span class="multi-select__option-label">Select All</span>
+    </button>
+
+    <div class="multi-select__options-list">
+      <button
+        type="button"
+        class="multi-select__option"
+        *ngFor="let option of filteredOptions"
+        (click)="toggleOption(option.value)"
+      >
+        <span
+          class="multi-select__checkbox"
+          [class.multi-select__checkbox--checked]="isSelected(option.value)"
+        >
+          <span class="multi-select__checkbox-icon" *ngIf="isSelected(option.value)">✓</span>
+        </span>
+
+        <span class="multi-select__option-label">{{ option.label }}</span>
+      </button>
+
+      <div class="multi-select__empty" *ngIf="filteredOptions.length === 0">
+        No results found
+      </div>
+    </div>
+  </div>
+
+  <p class="multi-select__hint" *ngIf="hint">
+    {{ hint }}
+  </p>
+</div>
