@@ -1,50 +1,384 @@
-<section class="catalog">
-  <div class="catalog__header">
-    <h1>Book Catalog</h1>
-    <p>Explore and manage the library collection.</p>
-  </div>
-
-  <div class="catalog__filters">
-    <input type="text" [(ngModel)]="searchKeyword" placeholder="Search by title or author" />
-    <input type="text" [(ngModel)]="selectedGenre" placeholder="Genre" />
-    <input type="text" [(ngModel)]="selectedLanguage" placeholder="Language" />
-    <input type="number" [(ngModel)]="selectedYear" placeholder="Publication year" />
-
-    <select [(ngModel)]="sortBy">
-      <option value="title">Title</option>
-      <option value="authorSurname">Author</option>
-      <option value="publicationYear">Year</option>
-      <option value="createdAt">Created date</option>
-    </select>
-
-    <select [(ngModel)]="sortDir">
-      <option value="asc">Ascending</option>
-      <option value="desc">Descending</option>
-    </select>
-
-    <button (click)="applyFilters()">Apply</button>
-    <button type="button" (click)="resetFilters()">Reset</button>
-  </div>
-
-  <div class="catalog__state" *ngIf="isLoading">Loading books...</div>
-
-  <div class="books-grid" *ngIf="!isLoading && books.length > 0">
-    <div class="book-card" *ngFor="let book of books" (click)="openDetails(book.id)">
-      <img [src]="book.coverImageUrl || 'https://via.placeholder.com/150'" alt="Book cover" />
-      <h3>{{ book.title }}</h3>
-      <p>{{ book.authorSurname }} {{ book.authorInitials }}</p>
-      <p>{{ book.publicationYear }}</p>
-      <span class="badge">{{ book.genre || 'Unknown genre' }}</span>
+<section class="catalog-page">
+  <div class="catalog-page__top">
+    <div class="catalog-page__breadcrumbs">
+      <a routerLink="/">Home</a>
+      <span>/</span>
+      <span>Catalog</span>
     </div>
   </div>
 
-  <div class="catalog__state" *ngIf="!isLoading && books.length === 0">
-    No books found.
+  <div class="catalog-page__shell">
+    <div class="catalog-page__content">
+      <div class="catalog-page__header">
+        <div class="catalog-page__title-block">
+          <h1>BOOK CATALOG</h1>
+
+          <div class="catalog-search">
+            <img src="assets/images/catalog/search-icon.svg" alt="" />
+            <input
+              type="text"
+              [(ngModel)]="searchKeyword"
+              placeholder="Search book name, author, edition..."
+            />
+          </div>
+        </div>
+
+        <div class="catalog-page__actions">
+          <button
+            type="button"
+            class="catalog-action"
+            *ngIf="isAdmin"
+            (click)="goToAddBook()"
+          >
+            <img 
+              class="catalog-action__icon catalog-action__icon--add"
+              src="assets/images/catalog/add-book-icon.svg" 
+              alt="" 
+            />
+            ADD BOOK
+          </button>
+
+          <button type="button" class="catalog-action" (click)="openSortModal()">
+            <img src="assets/images/catalog/sort-icon.svg" alt="" />
+            SORT BY
+          </button>
+
+          <button type="button" class="catalog-action" (click)="openFilterModal()">
+            <img src="assets/images/catalog/filter-icon.svg" alt="" />
+            FILTER
+          </button>
+        </div>
+      </div>
+
+      <div class="catalog-grid" *ngIf="visibleBooks.length > 0">
+        <article
+          class="catalog-book"
+          *ngFor="let book of visibleBooks"
+          (click)="openDetails(book.id)"
+        >
+          <div class="catalog-book__visual">
+            <img class="catalog-book__splash" [src]="book.splashUrl" alt="" />
+
+            <img
+              class="catalog-book__cover"
+              [src]="book.coverUrl"
+              [alt]="book.title"
+            />
+          </div>
+
+          <div class="catalog-book__info">
+            <h2>{{ book.title }}</h2>
+
+            <div class="catalog-book__meta">
+              <span>By {{ book.author }}</span>
+              <span>•</span>
+              <span>{{ book.year }}</span>
+              <span>•</span>
+              <span>{{ book.status }}</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="catalog-empty" *ngIf="filteredBooks.length === 0">
+        No books match the selected filters.
+      </div>
+
+      <div class="catalog-load-more" *ngIf="canLoadMore">
+        <button type="button" (click)="loadMoreBooks()">
+          LOAD MORE
+        </button>
+      </div>
+    </div>
   </div>
 
-  <div class="catalog__pagination" *ngIf="totalPages > 0">
-    <button (click)="previousPage()" [disabled]="page === 0">Previous</button>
-    <span>Page {{ page + 1 }} of {{ totalPages }}</span>
-    <button (click)="nextPage()" [disabled]="page >= totalPages - 1">Next</button>
+  <div
+    class="catalog-sort-overlay"
+    *ngIf="isSortModalOpen"
+    (click)="closeSortModal()"
+  >
+    <div class="catalog-sort-modal" (click)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="catalog-sort-modal__close"
+        (click)="closeSortModal()"
+        aria-label="Close sort modal"
+      >
+        ×
+      </button>
+
+      <img
+        class="catalog-sort-modal__paint catalog-sort-modal__paint--top"
+        src="assets/images/catalog/sort-paint-top.svg"
+        alt=""
+      />
+
+      <img
+        class="catalog-sort-modal__paint catalog-sort-modal__paint--right"
+        src="assets/images/catalog/sort-paint-right.svg"
+        alt=""
+      />
+
+      <h2>SORT BY</h2>
+
+      <div class="catalog-sort-modal__divider"></div>
+
+      <div class="catalog-sort-group">
+        <h3>Year</h3>
+
+        <label>
+          <input
+            type="checkbox"
+            [checked]="activeSortField === 'year' && activeSortDirection === 'asc'"
+            (change)="selectSort('year', 'asc')"
+          />
+          <span>Ascending</span>
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            [checked]="activeSortField === 'year' && activeSortDirection === 'desc'"
+            (change)="selectSort('year', 'desc')"
+          />
+          <span>Descending</span>
+        </label>
+      </div>
+
+      <div class="catalog-sort-modal__divider"></div>
+
+      <div class="catalog-sort-group">
+        <h3>Author</h3>
+
+        <label>
+          <input
+            type="checkbox"
+            [checked]="activeSortField === 'author' && activeSortDirection === 'asc'"
+            (change)="selectSort('author', 'asc')"
+          />
+          <span>A → Z</span>
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            [checked]="activeSortField === 'author' && activeSortDirection === 'desc'"
+            (change)="selectSort('author', 'desc')"
+          />
+          <span>Z → A</span>
+        </label>
+      </div>
+
+      <div class="catalog-sort-modal__divider"></div>
+
+      <div class="catalog-sort-group">
+        <h3>Title</h3>
+
+        <label>
+          <input
+            type="checkbox"
+            [checked]="activeSortField === 'title' && activeSortDirection === 'asc'"
+            (change)="selectSort('title', 'asc')"
+          />
+          <span>A → Z</span>
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            [checked]="activeSortField === 'title' && activeSortDirection === 'desc'"
+            (change)="selectSort('title', 'desc')"
+          />
+          <span>Z → A</span>
+        </label>
+      </div>
+
+      <div class="catalog-sort-modal__actions">
+        <button
+          type="button"
+          class="catalog-sort-modal__button catalog-sort-modal__button--reset"
+          (click)="resetSort()"
+        >
+          RESET
+        </button>
+
+        <button
+          type="button"
+          class="catalog-sort-modal__button catalog-sort-modal__button--apply"
+          (click)="applySort()"
+        >
+          APPLY NOW
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="catalog-filter-overlay"
+    *ngIf="isFilterModalOpen"
+    (click)="closeFilterModal()"
+  >
+    <div class="catalog-filter-modal" (click)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="catalog-filter-modal__close"
+        (click)="closeFilterModal()"
+        aria-label="Close filter modal"
+      >
+        ×
+      </button>
+
+      <img
+        class="catalog-filter-modal__paint"
+        src="assets/images/catalog/filter-paint.png"
+        alt=""
+      />
+
+      <h2>FILTER</h2>
+      <div class="catalog-filter-divider"></div>
+
+      <div class="catalog-filter-block">
+        <h3>Category</h3>
+
+        <div class="catalog-filter-tags">
+          <button
+            type="button"
+            class="catalog-filter-tags__item"
+            *ngFor="let category of categories"
+            [class.catalog-filter-tags__item--active]="isCategorySelected(category)"
+            (click)="toggleCategory(category)"
+          >
+            {{ category }}
+          </button>
+        </div>
+      </div>
+
+      <div class="catalog-filter-divider"></div>
+
+      <div class="catalog-filter-block">
+        <h3>Availability</h3>
+
+        <label class="catalog-filter-option">
+          <input
+            type="checkbox"
+            [checked]="selectedAvailability === 'Available'"
+            (change)="selectAvailability('Available')"
+          />
+          <span>Available now</span>
+        </label>
+
+        <label class="catalog-filter-option">
+          <input
+            type="checkbox"
+            [checked]="selectedAvailability === 'Not available'"
+            (change)="selectAvailability('Not available')"
+          />
+          <span>Not available</span>
+        </label>
+      </div>
+
+      <div class="catalog-filter-divider"></div>
+
+      <div class="catalog-filter-block">
+        <h3>Language</h3>
+
+        <div class="catalog-language-preview">
+          <button
+            type="button"
+            class="catalog-language-preview__item"
+            *ngFor="let language of selectedLanguages.slice(0, 3)"
+          >
+            {{ language }}
+          </button>
+
+          <button
+            type="button"
+            class="catalog-language-preview__more"
+            *ngIf="selectedLanguages.length > 3"
+          >
+            +{{ selectedLanguages.length - 3 }}
+          </button>
+
+          <button
+            type="button"
+            class="catalog-language-preview__select"
+            (click)="openLanguageModal()"
+          >
+            Select
+          </button>
+        </div>
+      </div>
+
+      <div class="catalog-filter-modal__actions">
+        <button
+          type="button"
+          class="catalog-filter-modal__button catalog-filter-modal__button--reset"
+          (click)="resetFilters()"
+        >
+          RESET
+        </button>
+
+        <button
+          type="button"
+          class="catalog-filter-modal__button catalog-filter-modal__button--apply"
+          (click)="applyFilters()"
+        >
+          APPLY NOW
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="catalog-language-overlay"
+    *ngIf="isLanguageModalOpen"
+    (click)="closeLanguageModal()"
+  >
+    <div class="catalog-language-modal" (click)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="catalog-language-modal__close"
+        (click)="closeLanguageModal()"
+        aria-label="Close language modal"
+      >
+        ×
+      </button>
+
+      <h2>Select Language</h2>
+
+      <div class="catalog-language-modal__search">
+        <img src="assets/images/catalog/search-icon-dark.svg" alt="" />
+        <input type="text" placeholder="Search language" />
+      </div>
+
+      <div class="catalog-language-list">
+        <label *ngFor="let language of languages">
+          <input
+            type="checkbox"
+            [checked]="isLanguageSelected(language)"
+            (change)="toggleLanguage(language)"
+          />
+          <span>{{ language }}</span>
+        </label>
+      </div>
+
+      <div class="catalog-language-modal__actions">
+        <button
+          type="button"
+          class="catalog-language-modal__button catalog-language-modal__button--reset"
+          (click)="selectedLanguages = []"
+        >
+          RESET
+        </button>
+
+        <button
+          type="button"
+          class="catalog-language-modal__button catalog-language-modal__button--apply"
+          (click)="applyLanguages()"
+        >
+          APPLY
+        </button>
+      </div>
+    </div>
   </div>
 </section>

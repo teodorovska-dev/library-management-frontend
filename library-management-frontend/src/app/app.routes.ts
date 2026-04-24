@@ -38,5 +38,6 @@ export const appRoutes: Routes = [
   { path: 'register/user', component: RegisterUserComponent },
   { path: 'register/admin', component: RegisterAdminComponent },
   { path: 'profile', component: UserProfileComponent, canActivate: [authGuard] },
+  { path: 'admin/add-book', component: AddBookComponent },
   { path: '**', redirectTo: '' }
 ];
