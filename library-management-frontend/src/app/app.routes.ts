@@ -16,7 +16,7 @@ import { ResetPasswordComponent } from './features/auth/reset-password/reset-pas
 import { PasswordChangedComponent } from './features/auth/password-changed/password-changed';
 import { RegisterUserComponent } from './features/auth/register-user/register-user';
 import { RegisterAdminComponent } from './features/auth/register-admin/register-admin';
-
+import { UserProfileComponent } from './features/profile/user-profile/user-profile';
 
 export const appRoutes: Routes = [
   { path: '', component: HomeComponent },
@@ -30,7 +30,6 @@ export const appRoutes: Routes = [
   { path: 'about', component: HomeComponent }, 
   { path: 'trending-books', component: HomeComponent },
   { path: 'contact', component: HomeComponent },
-  { path: 'profile', component: HomeComponent, canActivate: [authGuard] },
   { path: 'auth/select-role', component: RoleSelectionComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'verify-code', component: VerifyCodeComponent },
@@ -38,5 +37,6 @@ export const appRoutes: Routes = [
   { path: 'password-changed', component: PasswordChangedComponent },
   { path: 'register/user', component: RegisterUserComponent },
   { path: 'register/admin', component: RegisterAdminComponent },
+  { path: 'profile', component: UserProfileComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '' }
 ];

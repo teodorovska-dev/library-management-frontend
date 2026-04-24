@@ -1,0 +1,347 @@
+<section class="user-profile-page">
+  <div class="user-profile-page__hero">
+    <div class="user-profile-page__hero-content">
+      <h1>PROFILE CENTER</h1>
+      <p>Manage your personal information, saved books, and account access.</p>
+    </div>
+  </div>
+
+  <div class="user-profile-page__container">
+    <div class="user-profile-page__shell">
+      <div class="user-profile-page__grid">
+        <div class="profile-panel">
+          <div class="user-profile-page__section-header">
+            <h2>MY PROFILE</h2>
+            <p>Review and update your account details in one secure place.</p>
+          </div>
+
+          <form class="profile-card" [formGroup]="profileForm">
+            <div class="profile-card__identity">
+              <label
+                class="profile-card__avatar"
+                for="avatarInput"
+                [class.profile-card__avatar--editable]="isEditing"
+              >
+                <input
+                  id="avatarInput"
+                  type="file"
+                  accept="image/*"
+                  (change)="onAvatarSelected($event)"
+                />
+
+                <img
+                  [src]="avatarPreviewUrl"
+                  alt="User avatar"
+                  [class.profile-card__avatar-image--custom]="avatarPreviewUrl !== 'assets/images/profile/user-icon.svg'"
+                />
+
+                <span class="profile-card__avatar-overlay" *ngIf="isEditing">
+                  Change photo
+                </span>
+              </label>
+
+              <h3>{{ fullName }}</h3>
+            </div>
+
+            <div class="profile-card__info">
+              <h4>Personal information</h4>
+
+              <div class="profile-card__info-grid">
+                <div class="profile-card__field">
+                  <label for="firstName">First name</label>
+                  <input
+                    id="firstName"
+                    type="text"
+                    formControlName="firstName"
+                    [class.profile-card__input--error]="isFirstNameInvalid"
+                  />
+                </div>
+
+                <div class="profile-card__field">
+                  <label for="lastName">Last name</label>
+                  <input
+                    id="lastName"
+                    type="text"
+                    formControlName="lastName"
+                    [class.profile-card__input--error]="isLastNameInvalid"
+                  />
+                </div>
+
+                <div class="profile-card__field">
+                  <label for="email">Email address</label>
+                  <input
+                    id="email"
+                    type="email"
+                    formControlName="email"
+                    [class.profile-card__input--error]="isEmailInvalid"
+                  />
+                </div>
+
+                <div class="profile-card__field">
+                  <label for="status">Status</label>
+                  <input
+                    id="status"
+                    type="text"
+                    formControlName="status"
+                    [class.profile-card__input--error]="isStatusInvalid"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-card__stats">
+              <span>
+                {{ isAdmin ? 'Number of users right now' : 'Number of favorite books right now' }}
+              </span>
+
+              <div class="profile-card__stats-value">
+                {{ isAdmin ? 100 : favoriteBooks.length }}
+              </div>
+            </div>
+
+            <div class="profile-card__actions">
+              <button
+                type="button"
+                class="profile-card__button profile-card__button--primary"
+                (click)="onEditProfile()"
+                [disabled]="isEditing"
+              >
+                EDIT PROFILE
+              </button>
+
+              <button
+                type="button"
+                class="profile-card__button profile-card__button--secondary"
+                (click)="onSaveChanges()"
+                [disabled]="!isEditing || isSaving"
+              >
+                {{ isSaving ? 'SAVING...' : 'SAVE CHANGES' }}
+              </button>
+
+              <button
+                type="button"
+                class="profile-card__button profile-card__button--secondary"
+                (click)="onLogout()"
+              >
+                LOG OUT
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="favorites-panel" *ngIf="!isAdmin">
+          <div class="user-profile-page__section-header">
+            <h2>MY FAVORITE BOOKS</h2>
+            <p>Keep track of the books you saved for later reading.</p>
+          </div>
+
+          <div class="favorite-books">
+            <article class="favorite-book-card" *ngFor="let book of favoriteBooks">
+              <div class="favorite-book-card__cover-wrap">
+                <img
+                  class="favorite-book-card__cover"
+                  [src]="book.coverUrl"
+                  [alt]="book.title"
+                />
+
+                <img
+                  class="favorite-book-card__splash"
+                  [src]="book.splashUrl"
+                  alt=""
+                />
+              </div>
+
+              <div class="favorite-book-card__content">
+                <h3>{{ book.title }}</h3>
+
+                <p>
+                  By {{ book.author }}
+                  <span>•</span>
+                  {{ book.year }}
+                  <span>•</span>
+                  {{ book.status }}
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="admin-dashboard-panel" *ngIf="isAdmin">
+          <div class="user-profile-page__section-header">
+            <h2>DASHBOARD</h2>
+            <p>Monitor library activity and access the main admin actions.</p>
+          </div>
+
+          <div class="admin-dashboard">
+            <div class="admin-dashboard__stats">
+              <div
+                class="admin-dashboard__stat-card"
+                *ngFor="let item of dashboardStats"
+              >
+                <div>
+                  <h3>{{ item.label }}</h3>
+
+                  <p [ngClass]="'trend-' + item.trend">
+                    <ng-container [ngSwitch]="item.trend">
+                      <span *ngSwitchCase="'increase'">
+                        Increased{{ item.change ? ' by ' + item.change + '%' : '' }}<br />
+                        from last month
+                      </span>
+
+                      <span *ngSwitchCase="'decrease'">
+                        Decreased{{ item.change ? ' by ' + item.change + '%' : '' }}<br />
+                        from last month
+                      </span>
+
+                      <span *ngSwitchDefault>
+                        No changes<br />
+                        from last month
+                      </span>
+                    </ng-container>
+                  </p>
+                </div>
+
+                <strong>{{ item.value }}</strong>
+              </div>
+            </div>
+
+            <div class="admin-dashboard__actions">
+              <h3>Quick actions</h3>
+
+              <div class="admin-dashboard__action-grid">
+                <button
+                  type="button"
+                  class="admin-dashboard__action-card admin-dashboard__action-card--dark"
+                  routerLink="/admin/books/add"
+                >
+                  <img
+                    src="assets/images/admin/add-icon.svg"
+                    alt=""
+                    class="action-icon"
+                  />
+                  <p>ADD BOOK</p>
+                </button>
+
+                <button
+                  type="button"
+                  class="admin-dashboard__action-card admin-dashboard__action-card--light"
+                  routerLink="/catalog"
+                >
+                  <img
+                    src="assets/images/admin/book-icon-dark.svg"
+                    alt=""
+                    class="action-icon action-icon--sm"
+                  />
+                  <p>VIEW CATALOG</p>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-modal-overlay" *ngIf="activeModal">
+    <div class="profile-modal" *ngIf="activeModal === 'validation-error'">
+      <button
+        type="button"
+        class="profile-modal__close"
+        (click)="closeModal()"
+        aria-label="Close modal"
+      >
+        ×
+      </button>
+
+      <div class="profile-modal__icon profile-modal__icon--error">
+        <img src="assets/images/admin/error-red-icon.svg" alt="" />
+      </div>
+
+      <p class="profile-modal__message">
+        Please fill in required fields!
+      </p>
+
+      <div class="profile-modal__divider"></div>
+
+      <div class="profile-modal__actions">
+        <button
+          type="button"
+          class="profile-modal__button profile-modal__button--primary"
+          (click)="closeModal()"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+
+    <div class="profile-modal" *ngIf="activeModal === 'success'">
+      <button
+        type="button"
+        class="profile-modal__close"
+        (click)="closeModal()"
+        aria-label="Close modal"
+      >
+        ×
+      </button>
+
+      <div class="profile-modal__icon profile-modal__icon--success">
+        <img src="assets/images/admin/check-green-icon.svg" alt="" />
+      </div>
+
+      <p class="profile-modal__message">
+        Profile information has been successfully updated.
+      </p>
+
+      <div class="profile-modal__divider"></div>
+
+      <div class="profile-modal__actions">
+        <button
+          type="button"
+          class="profile-modal__button profile-modal__button--primary"
+          (click)="closeModal()"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+
+    <div class="profile-modal" *ngIf="activeModal === 'logout-confirm'">
+      <button
+        type="button"
+        class="profile-modal__close"
+        (click)="closeModal()"
+        aria-label="Close modal"
+      >
+        ×
+      </button>
+
+      <div class="profile-modal__icon profile-modal__icon--logout">
+        <img src="assets/images/profile/logout-icon.svg" alt="" />
+      </div>
+
+      <p class="profile-modal__message">
+        Are you sure you want to log out of your account?
+      </p>
+
+      <div class="profile-modal__divider"></div>
+
+      <div class="profile-modal__actions profile-modal__actions--two">
+        <button
+          type="button"
+          class="profile-modal__button profile-modal__button--primary"
+          (click)="confirmLogout()"
+        >
+          LOG OUT
+        </button>
+
+        <button
+          type="button"
+          class="profile-modal__button profile-modal__button--secondary"
+          (click)="closeModal()"
+        >
+          CANCEL
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

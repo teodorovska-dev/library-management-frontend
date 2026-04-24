@@ -9,7 +9,7 @@ import { AuthService } from '../../../core/services/auth';
   standalone: true,
   imports: [RouterModule, NgIf],
   templateUrl: './navbar.html',
-  styleUrl: './navbar.scss'
+  styleUrls: ['./navbar.scss']
 })
 export class NavbarComponent {
   constructor(
