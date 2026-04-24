@@ -1,4 +1,223 @@
-<section class="page">
-  <h1>Library Management System</h1>
-  <p>Smart library starts here.</p>
+<section class="home-page">
+  <section class="home-hero" id="home">
+    <div class="home-hero__inner">
+      <div class="home-hero__content">
+        <h1>
+          LIFE IS TOO<br />
+          SHORT TO LOSE<br />
+          TRACK OF YOUR<br />
+          BOOKS
+        </h1>
+
+        <p>
+          Organize your book collection, track availability, and manage records
+          with ease.
+        </p>
+
+        <a routerLink="/catalog" class="home-page__circle-link">
+          <span>VIEW CATALOG</span>
+          <span class="home-page__circle-link-icon">→</span>
+        </a>
+      </div>
+
+      <div class="home-hero__visual">
+        <img
+          src="assets/images/home/hero-books.png"
+          alt="Books composition"
+          class="home-hero__image"
+      />
+      </div>
+    </div>
+  </section>
+
+  <section class="home-dark-section">
+    <div class="home-dark-section__top-wave"></div>
+
+    <div class="home-dark-section__container" id="about">
+      <section class="about-system">
+        <div class="about-system__content">
+          <h2>ABOUT OUR SYSTEM</h2>
+
+          <p>
+            This Library Management System is designed to simplify the process
+            of organizing, tracking, and managing book collections. It provides
+            a structured and efficient way to maintain records, monitor
+            availability, and access information instantly.
+          </p>
+
+          <div class="about-system__features">
+            <article class="about-feature">
+              <img src="assets/images/home/collection-icon.svg" alt="" />
+              <h3>Organized Collection</h3>
+              <p>Keep every book and record neatly arranged.</p>
+            </article>
+
+            <article class="about-feature">
+              <img src="assets/images/home/search-icon.svg" alt="" />
+              <h3>Smart Search</h3>
+              <p>Find books instantly by title, author, or year.</p>
+            </article>
+
+            <article class="about-feature">
+              <img src="assets/images/home/manage-icon.svg" alt="" />
+              <h3>Easy Management</h3>
+              <p>Add, edit, or remove books in just a few minutes.</p>
+            </article>
+
+            <article class="about-feature">
+              <img src="assets/images/home/overview-icon.svg" alt="" />
+              <h3>Insightful Overview</h3>
+              <p>Get clear reports and track your library growth.</p>
+            </article>
+          </div>
+
+          <a routerLink="/catalog" class="home-page__circle-link home-page__circle-link--light">
+            <span>READ MORE</span>
+            <span class="home-page__circle-link-icon">→</span>
+          </a>
+        </div>
+
+        <div class="about-system__decor">
+          <img
+            src="assets/images/home/about-books-collage.png"
+            alt="Books collage"
+          />
+        </div>
+      </section>
+
+      <section class="trending-books" id="trending">
+        <div class="trending-books__header">
+          <h2>TRENDING BOOKS</h2>
+
+          <p>
+            Discover what everyone is reading right now and explore the most
+            popular books loved by our community.
+          </p>
+        </div>
+
+        <div class="trending-books__grid">
+          <article class="trending-card" *ngFor="let book of trendingBooks()">
+            <div class="trending-card__visual">
+              <div
+                class="trending-card__splash"
+                [ngClass]="'trending-card__splash--' + book.splashType"
+              ></div>
+
+              <img [src]="book.coverUrl" [alt]="book.title" />
+            </div>
+
+            <h3>{{ book.title }}</h3>
+
+            <p>
+              By {{ book.author }}
+              <span>•</span>
+              {{ book.year }}
+              <span>•</span>
+              {{ book.status }}
+            </p>
+          </article>
+        </div>
+
+        <div class="trending-books__controls">
+          <button type="button" aria-label="Previous book" (click)="prevSlide()">
+            ←
+          </button>
+
+          <button type="button" aria-label="Next book" (click)="nextSlide()">
+            →
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div class="home-dark-section__bottom-wave"></div>
+  </section>
+
+  <section class="home-footer-section" id="contact">
+    <div class="home-footer-section__container">
+      <footer class="home-footer">
+        <div class="home-footer__brand">
+          <h2>LIBRARY SYSTEM</h2>
+
+          <p>
+            Your gateway to knowledge and inspiration. Discover, read, and
+            explore a world of books.
+          </p>
+
+          <div class="home-footer__line"></div>
+
+          <h3>Follow us</h3>
+
+          <div class="home-footer__socials">
+            <a href="#" aria-label="Instagram">
+              <img src="assets/images/home/instagram-icon.svg" alt="" />
+            </a>
+
+            <a href="#" aria-label="X">
+              <img src="assets/images/home/x-icon.svg" alt="" />
+            </a>
+
+            <a href="#" aria-label="Facebook">
+              <img src="assets/images/home/facebook-icon.svg" alt="" />
+            </a>
+
+            <a href="#" aria-label="Discord">
+              <img src="assets/images/home/discord-icon.svg" alt="" />
+            </a>
+          </div>
+        </div>
+
+        <div class="home-footer__contacts">
+          <h3>Contacts</h3>
+
+          <div class="home-footer__contact-item">
+            <img src="assets/images/home/location-icon.svg" alt="" />
+            <span>12 Shevchenka St., Apt. 45<br />Lviv, Ukraine</span>
+          </div>
+
+          <div class="home-footer__contact-item">
+            <img src="assets/images/home/phone-icon.svg" alt="" />
+            <span>+380 50 123 45 67</span>
+          </div>
+
+          <div class="home-footer__contact-item">
+            <img src="assets/images/home/mail-icon.svg" alt="" />
+            <span>info&#64;librarysystem.com</span>
+          </div>
+
+          <div class="home-footer__contact-item">
+            <img src="assets/images/home/clock-icon.svg" alt="" />
+            <span>Mon – Fri: 9:00 AM – 6:00 PM<br />Sat – Sun: Closed</span>
+          </div>
+        </div>
+
+        <nav class="home-footer__links" aria-label="Quick links">
+          <h3>Quick links</h3>
+
+          <a routerLink="/">Home</a>
+          <a routerLink="/catalog">Catalog</a>
+          <a href="#about">About us</a>
+          <a routerLink="/favorites">Favourites</a>
+          <a routerLink="/profile">My profile</a>
+        </nav>
+
+        <nav class="home-footer__links" aria-label="Help">
+          <h3>Help</h3>
+
+          <a href="#">FAQ</a>
+          <a href="#">Borrowing Policy</a>
+          <a href="#">Returns</a>
+          <a href="#">Terms & Conditions</a>
+          <a href="#">Privacy Policy</a>
+        </nav>
+
+        <div class="home-footer__bottom">
+          <span>© 2024 LibrarySystem. All rights reserved.</span>
+          <span>Read more. Learn more. Be more.</span>
+        </div>
+      </footer>
+
+      <div class="home-footer-section__watermark">LIBRARY SYSTEM</div>
+    </div>
+  </section>
 </section>

@@ -4,10 +4,17 @@ body {
   padding: 0;
   width: 100%;
   overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 * {
   box-sizing: border-box;
+}
+
+#about,
+#trending,
+#contact {
+  scroll-margin-top: 120px;
 }
 
 app-root {

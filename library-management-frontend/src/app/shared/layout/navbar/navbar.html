@@ -4,18 +4,28 @@
 
     <div class="navbar__center">
       <a routerLink="/catalog" class="navbar__link">CATALOG</a>
-      <a routerLink="/about" class="navbar__link">ABOUT US</a>
-      <a routerLink="/trending-books" class="navbar__link">TRENDING BOOKS</a>
-      <a routerLink="/contact" class="navbar__link">CONTACT</a>
+      <a routerLink="/" fragment="about" class="navbar__link">ABOUT US</a>
+      <a routerLink="/" fragment="trending" class="navbar__link">TRENDING BOOKS</a>
+      <a routerLink="/" fragment="contact" class="navbar__link">CONTACT</a>
     </div>
 
     <div class="navbar__actions" *ngIf="!tokenService.isLoggedIn()">
-      <a routerLink="/login" class="navbar__button navbar__button--outline">SIGN IN</a>
-      <a routerLink="/auth/select-role" class="navbar__button navbar__button--filled">REGISTER</a>
+      <a routerLink="/login" class="navbar__button navbar__button--outline">
+        SIGN IN
+      </a>
+
+      <a routerLink="/auth/select-role" class="navbar__button navbar__button--filled">
+        REGISTER
+      </a>
     </div>
 
     <div class="navbar__profile" *ngIf="tokenService.isLoggedIn()">
-      <button type="button" class="navbar__profile-button" (click)="goToProfile()" aria-label="Open profile">
+      <button
+        type="button"
+        class="navbar__profile-button"
+        (click)="goToProfile()"
+        aria-label="Open profile"
+      >
         <img
           src="assets/images/nav/user-circle.svg"
           alt="Profile"

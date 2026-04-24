@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
 import { NgIf } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 import { TokenService } from '../../../core/services/token';
 import { AuthService } from '../../../core/services/auth';
 
@@ -9,7 +9,7 @@ import { AuthService } from '../../../core/services/auth';
   standalone: true,
   imports: [RouterModule, NgIf],
   templateUrl: './navbar.html',
-  styleUrls: ['./navbar.scss']
+  styleUrls: ['./navbar.scss'],
 })
 export class NavbarComponent {
   constructor(
