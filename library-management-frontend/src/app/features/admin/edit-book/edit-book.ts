@@ -2,6 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { of, switchMap } from 'rxjs';
+import { BooksService } from '../../../core/services/books';
+import { Book } from '../../../core/models/book.model';
 import {
   MultiSelectComponent,
   MultiSelectOption
@@ -20,36 +23,39 @@ export class EditBookComponent implements OnInit {
   editBookForm: FormGroup;
   selectedCoverName = '';
   coverPreviewUrl: string | null = null;
+  selectedCoverFile: File | null = null;
+  currentCoverImageUrl = '';
+  bookId!: number;
   isSubmitting = false;
-
   activeModal: EditBookModalType = null;
 
   readonly languageOptions: MultiSelectOption[] = [
-    { label: 'English', value: 'english' },
-    { label: 'Ukrainian', value: 'ukrainian' },
-    { label: 'Polish', value: 'polish' },
-    { label: 'German', value: 'german' },
-    { label: 'French', value: 'french' },
+    { label: 'English', value: 'English' },
+    { label: 'Ukrainian', value: 'Ukrainian' },
+    { label: 'Polish', value: 'Polish' },
+    { label: 'German', value: 'German' },
+    { label: 'French', value: 'French' },
   ];
 
   readonly categoryOptions: MultiSelectOption[] = [
-    { label: 'Fiction', value: 'fiction' },
-    { label: 'Fantasy', value: 'fantasy' },
-    { label: 'Science', value: 'science' },
-    { label: 'History', value: 'history' },
-    { label: 'Biography', value: 'biography' },
-    { label: 'Romance', value: 'romance' },
-    { label: 'Programming', value: 'programming' },
+    { label: 'Fiction', value: 'Fiction' },
+    { label: 'Fantasy', value: 'Fantasy' },
+    { label: 'Science', value: 'Science' },
+    { label: 'History', value: 'History' },
+    { label: 'Biography', value: 'Biography' },
+    { label: 'Romance', value: 'Romance' },
+    { label: 'Programming', value: 'Programming' },
   ];
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private booksService: BooksService
   ) {
     this.editBookForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(120)]],
-      author: ['', [Validators.required, Validators.maxLength(100)]],
+      author: ['', [Validators.required, Validators.maxLength(150)]],
       publisher: ['', [Validators.required, Validators.maxLength(100)]],
       editors: ['', [Validators.maxLength(150)]],
       publicationYear: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
@@ -65,104 +71,69 @@ export class EditBookComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const bookId = this.route.snapshot.paramMap.get('id');
-    this.loadBookData(bookId);
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+
+    if (Number.isNaN(id) || id <= 0) {
+      this.router.navigate(['/catalog']);
+      return;
+    }
+
+    this.bookId = id;
+    this.loadBookData();
   }
 
-  private loadBookData(bookId: string | null): void {
-    const mockBook = {
-      id: bookId ?? '1',
-      title: 'Clean Code',
-      author: 'Robert C. Martin',
-      publisher: 'Prentice Hall',
-      editors: 'Martin Team',
-      publicationYear: '2008',
-      isbn: '9780132350884',
-      format: 'Hardcover',
-      features: 'Bestseller, Illustrated',
-      languages: ['english'],
-      category: ['programming', 'science'],
-      description: 'A handbook of agile software craftsmanship and code quality principles.',
-      availableCopies: 12,
-      coverUrl: 'assets/images/admin/mock-book-cover.png'
-    };
+  private loadBookData(): void {
+    this.booksService.getBookById(this.bookId).subscribe({
+      next: book => this.patchForm(book),
+      error: error => {
+        console.error('Failed to load book:', error);
+        this.router.navigate(['/catalog']);
+      }
+    });
+  }
+
+  private patchForm(book: Book): void {
+    this.currentCoverImageUrl = book.coverImageUrl || '';
 
     this.editBookForm.patchValue({
-      title: mockBook.title,
-      author: mockBook.author,
-      publisher: mockBook.publisher,
-      editors: mockBook.editors,
-      publicationYear: mockBook.publicationYear,
-      isbn: mockBook.isbn,
-      format: mockBook.format,
-      features: mockBook.features,
-      languages: mockBook.languages,
-      category: mockBook.category,
-      description: mockBook.description,
-      availableCopies: mockBook.availableCopies,
+      title: book.title,
+      author: book.authorFullName,
+      publisher: book.publisher,
+      editors: '',
+      publicationYear: String(book.publicationYear),
+      isbn: book.isbn,
+      format: 'Printed book',
+      features: `${book.copiesCount} copies in library`,
+      languages: book.language ? [book.language] : [],
+      category: book.genre ? [book.genre] : [],
+      description: book.description,
+      availableCopies: book.copiesCount,
+      cover: null
     });
 
-    this.coverPreviewUrl = mockBook.coverUrl;
-    this.selectedCoverName = 'current-book-cover.png';
+    this.coverPreviewUrl = this.resolveCoverUrl(book.coverImageUrl);
+    this.selectedCoverName = book.coverImageUrl ? 'current-book-cover' : '';
   }
 
-  get isTitleInvalid(): boolean {
-    const control = this.editBookForm.get('title');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isAuthorInvalid(): boolean {
-    const control = this.editBookForm.get('author');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isPublisherInvalid(): boolean {
-    const control = this.editBookForm.get('publisher');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isPublicationYearInvalid(): boolean {
-    const control = this.editBookForm.get('publicationYear');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isIsbnInvalid(): boolean {
-    const control = this.editBookForm.get('isbn');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isFormatInvalid(): boolean {
-    const control = this.editBookForm.get('format');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isFeaturesInvalid(): boolean {
-    const control = this.editBookForm.get('features');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isLanguagesInvalid(): boolean {
-    const control = this.editBookForm.get('languages');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isCategoryInvalid(): boolean {
-    const control = this.editBookForm.get('category');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isDescriptionInvalid(): boolean {
-    const control = this.editBookForm.get('description');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isAvailableCopiesInvalid(): boolean {
-    const control = this.editBookForm.get('availableCopies');
-    return !!control && control.invalid && control.touched;
-  }
+  get isTitleInvalid(): boolean { return this.isInvalid('title'); }
+  get isAuthorInvalid(): boolean { return this.isInvalid('author'); }
+  get isPublisherInvalid(): boolean { return this.isInvalid('publisher'); }
+  get isPublicationYearInvalid(): boolean { return this.isInvalid('publicationYear'); }
+  get isIsbnInvalid(): boolean { return this.isInvalid('isbn'); }
+  get isFormatInvalid(): boolean { return this.isInvalid('format'); }
+  get isFeaturesInvalid(): boolean { return this.isInvalid('features'); }
+  get isLanguagesInvalid(): boolean { return this.isInvalid('languages'); }
+  get isCategoryInvalid(): boolean { return this.isInvalid('category'); }
+  get isDescriptionInvalid(): boolean { return this.isInvalid('description'); }
+  get isAvailableCopiesInvalid(): boolean { return this.isInvalid('availableCopies'); }
 
   get isAnyModalOpen(): boolean {
     return this.activeModal !== null;
+  }
+
+  private isInvalid(controlName: string): boolean {
+    const control = this.editBookForm.get(controlName);
+    return !!control && control.invalid && control.touched;
   }
 
   onCoverSelected(event: Event): void {
@@ -173,6 +144,7 @@ export class EditBookComponent implements OnInit {
       return;
     }
 
+    this.selectedCoverFile = file;
     this.selectedCoverName = file.name;
     this.editBookForm.patchValue({ cover: file });
 
@@ -192,12 +164,59 @@ export class EditBookComponent implements OnInit {
 
     this.isSubmitting = true;
 
-    console.log('Updated book data:', this.editBookForm.value);
+    const upload$ = this.selectedCoverFile
+      ? this.booksService.uploadBookCover(this.selectedCoverFile)
+      : of({ url: this.currentCoverImageUrl });
 
-    setTimeout(() => {
-      this.isSubmitting = false;
-      this.openModal('success');
-    }, 600);
+    upload$
+      .pipe(
+        switchMap(uploadResponse => {
+          const request = this.mapFormToBookRequest(uploadResponse.url);
+          return this.booksService.updateBook(this.bookId, request);
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          this.openModal('success');
+        },
+        error: error => {
+          console.error('Failed to update book:', error);
+          this.isSubmitting = false;
+          this.openModal('validation-error');
+        }
+      });
+  }
+
+  private mapFormToBookRequest(coverImageUrl: string) {
+    const value = this.editBookForm.value;
+    const selectedLanguages = value.languages as string[];
+    const selectedCategories = value.category as string[];
+
+    return {
+      title: value.title.trim(),
+      authorFullName: value.author.trim(),
+      publicationYear: Number(value.publicationYear),
+      copiesCount: Number(value.availableCopies),
+      genre: selectedCategories[0],
+      language: selectedLanguages[0],
+      isbn: value.isbn.trim(),
+      publisher: value.publisher.trim(),
+      description: value.description.trim(),
+      coverImageUrl
+    };
+  }
+
+  private resolveCoverUrl(coverImageUrl?: string): string | null {
+    if (!coverImageUrl || coverImageUrl.includes('example.com')) {
+      return null;
+    }
+
+    if (coverImageUrl.startsWith('/uploads')) {
+      return `http://localhost:8082${coverImageUrl}`;
+    }
+
+    return coverImageUrl;
   }
 
   onDeleteBook(): void {
@@ -205,9 +224,16 @@ export class EditBookComponent implements OnInit {
   }
 
   confirmDeleteBook(): void {
-    this.closeModal();
-    console.log('Book deleted');
-    this.router.navigate(['/catalog']);
+    this.booksService.writeOffBook(this.bookId).subscribe({
+      next: () => {
+        this.closeModal();
+        this.router.navigate(['/catalog']);
+      },
+      error: error => {
+        console.error('Failed to write off book:', error);
+        this.closeModal();
+      }
+    });
   }
 
   onClear(): void {
@@ -219,6 +245,7 @@ export class EditBookComponent implements OnInit {
 
     this.selectedCoverName = '';
     this.coverPreviewUrl = null;
+    this.selectedCoverFile = null;
   }
 
   openModal(type: EditBookModalType): void {
