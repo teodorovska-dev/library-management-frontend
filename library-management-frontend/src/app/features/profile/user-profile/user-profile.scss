@@ -338,6 +338,14 @@
   padding-right: 64px;
 }
 
+.profile-empty {
+  padding: 64px 0;
+  font-family: 'Kanit', sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.82);
+}
+
 .favorite-book-card {
   position: relative;
   min-height: 268px;

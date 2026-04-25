@@ -1,7 +1,12 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { NgFor, NgIf, NgClass, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+
+import { TokenService } from '../../../core/services/token';
+import { FavoritesService } from '../../../core/services/favorites';
+import { Book } from '../../../core/models/book.model';
+import { DashboardService, AdminDashboardStats } from '../../../core/services/dashboard';
 
 type ProfileModalType = 'success' | 'validation-error' | 'logout-confirm' | null;
 type DashboardTrend = 'increase' | 'decrease' | 'neutral';
@@ -40,7 +45,7 @@ interface DashboardStat {
   styleUrls: ['./user-profile.scss'],
 })
 export class UserProfileComponent {
-  isAdmin = true;
+  isAdmin = false;
   isEditing = false;
   isSaving = false;
 
@@ -51,66 +56,33 @@ export class UserProfileComponent {
 
   profileForm: FormGroup;
 
-  dashboardStats: DashboardStat[] = [
-    { label: 'Total books', value: 1000, trend: 'increase', change: 12 },
-    { label: 'Total titles', value: 1000, trend: 'neutral' },
-    { label: 'Total authors', value: 1000, trend: 'increase', change: 8 },
-    { label: 'Written-off books', value: 1000, trend: 'decrease', change: 4 },
-    { label: 'Available copies', value: 1000, trend: 'increase', change: 10 },
-  ];
-
-  favoriteBooks: FavoriteBook[] = [
-    {
-      id: 1,
-      title: 'THE PSYCHOLOGY OF MONEY',
-      author: 'Morgan Housel',
-      year: 2020,
-      status: 'Available',
-      coverUrl: 'assets/images/books/psychology-of-money.png',
-      splashUrl: 'assets/images/profile/splash-green.svg',
-    },
-    {
-      id: 2,
-      title: 'IT ENDS WITH US',
-      author: 'Colleen Hoover',
-      year: 2020,
-      status: 'Available',
-      coverUrl: 'assets/images/books/it-ends-with-us.png',
-      splashUrl: 'assets/images/profile/splash-pink.svg',
-    },
-    {
-      id: 3,
-      title: 'THE SUBTLE ART OF NOT GIVING A F*CK',
-      author: 'Mark Manson',
-      year: 2020,
-      status: 'Available',
-      coverUrl: 'assets/images/books/subtle-art.png',
-      splashUrl: 'assets/images/profile/splash-orange.svg',
-    },
-    {
-      id: 4,
-      title: 'A GOOD GIRL’S GUIDE TO MURDER',
-      author: 'Holly Jackson',
-      year: 2020,
-      status: 'Available',
-      coverUrl: 'assets/images/books/good-girls-guide.png',
-      splashUrl: 'assets/images/profile/splash-white.svg',
-    },
-  ];
+  dashboardStats: DashboardStat[] = [];
+  favoriteBooks: FavoriteBook[] = [];
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    public router: Router,
+    private tokenService: TokenService,
+    private favoritesService: FavoritesService,
+    private dashboardService: DashboardService,
+    private cdr: ChangeDetectorRef
   ) {
     this.profileForm = this.fb.group({
-      firstName: ['Anastasiia', [Validators.required, Validators.maxLength(60)]],
-      lastName: ['Teodorovska', [Validators.required, Validators.maxLength(60)]],
-      email: ['anastasiia.teodorovska@gmail.com', [Validators.required, Validators.email]],
-      status: [this.isAdmin ? 'Administrator' : 'User', [Validators.required]],
+      firstName: ['', [Validators.required, Validators.maxLength(60)]],
+      lastName: ['', [Validators.required, Validators.maxLength(60)]],
+      email: ['', [Validators.required, Validators.email]],
+      status: ['', [Validators.required]],
       avatar: [null],
     });
 
+    this.initializeProfile();
     this.profileForm.disable();
+
+    if (this.isAdmin) {
+      this.loadDashboardStats();
+    } else {
+      this.loadFavorites();
+    }
   }
 
   get fullName(): string {
@@ -140,6 +112,114 @@ export class UserProfileComponent {
     return !!control && control.invalid && control.touched;
   }
 
+  private initializeProfile(): void {
+    const user = this.tokenService.getUser();
+
+    this.isAdmin = user?.role === 'ADMIN';
+
+    const fullName = user?.fullName || '';
+    const nameParts = fullName.trim().split(' ').filter(Boolean);
+
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    this.profileForm.patchValue({
+      firstName,
+      lastName,
+      email: user?.email || '',
+      status: this.isAdmin ? 'Administrator' : 'User'
+    });
+  }
+
+  private loadFavorites(): void {
+    if (this.isAdmin) {
+      this.favoriteBooks = [];
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.favoritesService.getFavorites().subscribe({
+      next: books => {
+        this.favoriteBooks = books.map(book => this.mapBookToFavoriteBook(book));
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Failed to load favorite books:', error);
+        this.favoriteBooks = [];
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private mapBookToFavoriteBook(book: Book): FavoriteBook {
+    return {
+      id: book.id,
+      title: book.title,
+      author: book.authorFullName,
+      year: book.publicationYear,
+      status: book.status === 'AVAILABLE' ? 'Available' : 'Not available',
+      coverUrl: this.resolveCoverUrl(book.coverImageUrl),
+      splashUrl: this.getSplashUrl(book.genre)
+    };
+  }
+
+  private resolveCoverUrl(coverImageUrl?: string): string {
+    if (!coverImageUrl || coverImageUrl.includes('example.com')) {
+      return 'assets/images/books/book-details-cover.png';
+    }
+
+    if (coverImageUrl.startsWith('/uploads')) {
+      return `http://localhost:8082${coverImageUrl}`;
+    }
+
+    return coverImageUrl;
+  }
+
+  private getSplashUrl(genre?: string): string {
+    const normalizedGenre = genre?.toLowerCase() ?? '';
+
+    if (normalizedGenre.includes('romance')) {
+      return 'assets/images/profile/splash-pink.svg';
+    }
+
+    if (normalizedGenre.includes('finance') || normalizedGenre.includes('psychology')) {
+      return 'assets/images/profile/splash-green.svg';
+    }
+
+    if (normalizedGenre.includes('mystery') || normalizedGenre.includes('classic')) {
+      return 'assets/images/profile/splash-white.svg';
+    }
+
+    return 'assets/images/profile/splash-orange.svg';
+  }
+
+  private loadDashboardStats(): void {
+    this.dashboardService.getStats().subscribe({
+      next: stats => {
+        this.dashboardStats = this.mapDashboardStats(stats);
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Failed to load dashboard stats:', error);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private mapDashboardStats(stats: AdminDashboardStats): DashboardStat[] {
+    return [
+      { label: 'Total books', value: stats.totalBooks, trend: 'neutral' },
+      { label: 'Total titles', value: stats.totalTitles, trend: 'neutral' },
+      { label: 'Total authors', value: stats.totalAuthors, trend: 'neutral' },
+      { label: 'Written-off books', value: stats.writtenOffBooks, trend: 'neutral' },
+      { label: 'Available copies', value: stats.availableCopies, trend: 'neutral' },
+    ];
+  }
+
+  onOpenFavoriteBook(bookId: number): void {
+    this.router.navigate(['/books', bookId]);
+  }
+
   onEditProfile(): void {
     this.isEditing = true;
     this.profileForm.enable();
@@ -165,6 +245,7 @@ export class UserProfileComponent {
 
     reader.onload = () => {
       this.avatarPreviewUrl = reader.result as string;
+      this.cdr.detectChanges();
     };
 
     reader.readAsDataURL(file);
@@ -183,13 +264,12 @@ export class UserProfileComponent {
 
     this.isSaving = true;
 
-    console.log('Updated profile data:', this.profileForm.getRawValue());
-
     setTimeout(() => {
       this.isSaving = false;
       this.isEditing = false;
       this.profileForm.disable();
       this.openModal('success');
+      this.cdr.detectChanges();
     }, 600);
   }
 
@@ -199,10 +279,7 @@ export class UserProfileComponent {
 
   confirmLogout(): void {
     this.closeModal();
-
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-
+    this.tokenService.clear();
     this.router.navigate(['/login']);
   }
 

@@ -136,7 +136,7 @@
           </div>
 
           <div class="favorite-books">
-            <article class="favorite-book-card" *ngFor="let book of favoriteBooks">
+            <article class="favorite-book-card" *ngFor="let book of favoriteBooks" (click)="onOpenFavoriteBook(book.id)">
               <div class="favorite-book-card__cover-wrap">
                 <img
                   class="favorite-book-card__cover"

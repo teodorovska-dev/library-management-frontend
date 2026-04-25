@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TokenService } from '../../../core/services/token';
 import { BooksService } from '../../../core/services/books';
 import { Book } from '../../../core/models/book.model';
+import { FavoritesService } from '../../../core/services/favorites';
 
 type BookDetailsModalType = 'delete-confirm' | null;
 
@@ -66,7 +67,8 @@ export class BookDetailsComponent {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly tokenService: TokenService,
-    private readonly booksService: BooksService
+    private readonly booksService: BooksService,
+    private readonly favoritesService: FavoritesService
   ) {
     this.loadBook();
   }
@@ -85,6 +87,7 @@ export class BookDetailsComponent {
     this.booksService.getBookById(bookId).subscribe({
       next: book => {
         this.book.set(this.mapBookToViewModel(book));
+        this.loadFavoriteStatus(book.id);
         this.isLoading.set(false);
       },
       error: error => {
@@ -143,13 +146,27 @@ export class BookDetailsComponent {
     return 'Written off';
   }
 
-  onToggleFavorite(): void {
-    if (!this.isUser()) {
-      return;
-    }
-
-    this.isSavedToFavorites.set(!this.isSavedToFavorites());
+onToggleFavorite(): void {
+  if (!this.isUser()) {
+    return;
   }
+
+  const bookId = this.book().id;
+
+  if (this.isSavedToFavorites()) {
+    this.favoritesService.removeFromFavorites(bookId).subscribe({
+      next: () => this.isSavedToFavorites.set(false),
+      error: error => console.error('Failed to remove favorite:', error)
+    });
+
+    return;
+  }
+
+  this.favoritesService.addToFavorites(bookId).subscribe({
+    next: () => this.isSavedToFavorites.set(true),
+    error: error => console.error('Failed to add favorite:', error)
+  });
+}
 
   onEditBook(): void {
     if (!this.isAdmin()) {
@@ -204,4 +221,15 @@ export class BookDetailsComponent {
   getCategoryLabel(): string {
     return this.book().categories.join(' / ');
   }
+
+  private loadFavoriteStatus(bookId: number): void {
+  if (!this.isUser()) {
+    return;
+  }
+
+  this.favoritesService.isFavorite(bookId).subscribe({
+    next: response => this.isSavedToFavorites.set(response.favorite),
+    error: error => console.error('Failed to load favorite status:', error)
+  });
+}
 }
