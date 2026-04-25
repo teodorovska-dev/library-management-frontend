@@ -18,6 +18,7 @@
             <input
               type="text"
               [(ngModel)]="searchKeyword"
+              (ngModelChange)="onSearchChange($event)"
               placeholder="Search book name, author, edition..."
             />
           </div>
@@ -63,6 +64,7 @@
               class="catalog-book__cover"
               [src]="book.coverUrl"
               [alt]="book.title"
+              (error)="onCoverError(book)"
             />
           </div>
 
@@ -80,7 +82,15 @@
         </article>
       </div>
 
-      <div class="catalog-empty" *ngIf="filteredBooks.length === 0">
+      <div class="catalog-loading" *ngIf="isLoading">
+        Loading books...
+      </div>
+
+      <div class="catalog-loading" *ngIf="isLoading && searchKeyword">
+        Searching...
+      </div>
+
+      <div class="catalog-empty" *ngIf="showEmptyState">
         No books match the selected filters.
       </div>
 
@@ -348,11 +358,15 @@
 
       <div class="catalog-language-modal__search">
         <img src="assets/images/catalog/search-icon-dark.svg" alt="" />
-        <input type="text" placeholder="Search language" />
+        <input 
+          type="text"
+          [(ngModel)]="languageSearchKeyword"
+          placeholder="Search language" 
+        />
       </div>
 
       <div class="catalog-language-list">
-        <label *ngFor="let language of languages">
+        <label *ngFor="let language of filteredLanguages">
           <input
             type="checkbox"
             [checked]="isLanguageSelected(language)"
@@ -366,7 +380,7 @@
         <button
           type="button"
           class="catalog-language-modal__button catalog-language-modal__button--reset"
-          (click)="selectedLanguages = []"
+          (click)="resetLanguages()"
         >
           RESET
         </button>

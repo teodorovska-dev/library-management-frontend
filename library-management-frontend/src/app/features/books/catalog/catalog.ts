@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { TokenService } from '../../../core/services/token';
+import { BooksService } from '../../../core/services/books';
+import { Book } from '../../../core/models/book.model';
 
 type SortField = 'year' | 'author' | 'title';
 type SortDirection = 'asc' | 'desc';
@@ -26,8 +29,9 @@ interface CatalogBook {
   templateUrl: './catalog.html',
   styleUrl: './catalog.scss'
 })
-export class CatalogComponent {
+export class CatalogComponent implements OnInit, OnDestroy {
   searchKeyword = '';
+  languageSearchKeyword = '';
 
   isSortModalOpen = false;
   isFilterModalOpen = false;
@@ -41,329 +45,226 @@ export class CatalogComponent {
   selectedLanguages: string[] = [];
 
   readonly booksPerLoad = 12;
-  visibleBooksCount = this.booksPerLoad;
 
-  categories = [
-    'Fiction',
-    'Non-Fiction',
-    'Thriller',
-    'Romance',
-    'Fantasy',
-    'Action',
-    'Young Adult',
-    'Mystery',
-    'History',
-    'Psychology',
-    'Classic',
-    'Biography',
-    'Health & Wellness',
-    'Self Development'
-  ];
+  currentPage = 0;
+  isLastPage = false;
+  isLoading = false;
 
-  languages = [
-    'English',
-    'Ukrainian',
-    'Polish',
-    'German',
-    'French',
-    'Italian',
-    'Spanish',
-    'Chinese',
-    'Japanese'
-  ];
+  books: CatalogBook[] = [];
+  filteredBooks: CatalogBook[] = [];
 
-  books: CatalogBook[] = [
-    {
-      id: 1,
-      title: 'The Psychology of Money',
-      author: 'Morgan Housel',
-      year: 2020,
-      status: 'Available',
-      category: 'Psychology',
-      language: 'English',
-      coverUrl: 'assets/images/catalog/book-psychology-money.png',
-      splashUrl: 'assets/images/catalog/splash-green.svg'
-    },
-    {
-      id: 2,
-      title: 'It Ends With Us',
-      author: 'Colleen Hoover',
-      year: 2022,
-      status: 'Available',
-      category: 'Romance',
-      language: 'English',
-      coverUrl: 'assets/images/catalog/book-it-ends-with-us.png',
-      splashUrl: 'assets/images/catalog/splash-pink.svg'
-    },
-    {
-      id: 3,
-      title: 'The Subtle Art of Not Giving a F*ck',
-      author: 'Mark Manson',
-      year: 2016,
-      status: 'Available',
-      category: 'Self Development',
-      language: 'English',
-      coverUrl: 'assets/images/catalog/book-subtle-art.png',
-      splashUrl: 'assets/images/catalog/splash-orange.svg'
-    },
-    {
-      id: 4,
-      title: 'A Good Girl’s Guide to Murder',
-      author: 'Holly Jackson',
-      year: 2019,
-      status: 'Available',
-      category: 'Mystery',
-      language: 'English',
-      coverUrl: 'assets/images/catalog/book-good-girl-guide.png',
-      splashUrl: 'assets/images/catalog/splash-white.svg'
-    },
-    {
-      id: 5,
-      title: 'Atomic Habits',
-      author: 'James Clear',
-      year: 2018,
-      status: 'Available',
-      category: 'Self Development',
-      language: 'Ukrainian',
-      coverUrl: 'assets/images/catalog/book-psychology-money.png',
-      splashUrl: 'assets/images/catalog/splash-green.svg'
-    },
-    {
-      id: 6,
-      title: 'Verity',
-      author: 'Colleen Hoover',
-      year: 2018,
-      status: 'Not available',
-      category: 'Thriller',
-      language: 'Polish',
-      coverUrl: 'assets/images/catalog/book-it-ends-with-us.png',
-      splashUrl: 'assets/images/catalog/splash-pink.svg'
-    },
-    {
-      id: 7,
-      title: 'Everything Is F*cked',
-      author: 'Mark Manson',
-      year: 2019,
-      status: 'Available',
-      category: 'Psychology',
-      language: 'English',
-      coverUrl: 'assets/images/catalog/book-subtle-art.png',
-      splashUrl: 'assets/images/catalog/splash-orange.svg'
-    },
-    {
-      id: 8,
-      title: 'Good Girl, Bad Blood',
-      author: 'Holly Jackson',
-      year: 2020,
-      status: 'Not available',
-      category: 'Mystery',
-      language: 'German',
-      coverUrl: 'assets/images/catalog/book-good-girl-guide.png',
-      splashUrl: 'assets/images/catalog/splash-white.svg'
-    },
-    {
-      id: 9,
-      title: 'Rich Dad Poor Dad',
-      author: 'Robert Kiyosaki',
-      year: 1997,
-      status: 'Available',
-      category: 'Biography',
-      language: 'English',
-      coverUrl: 'assets/images/catalog/book-psychology-money.png',
-      splashUrl: 'assets/images/catalog/splash-green.svg'
-    },
-    {
-      id: 10,
-      title: 'Ugly Love',
-      author: 'Colleen Hoover',
-      year: 2014,
-      status: 'Available',
-      category: 'Romance',
-      language: 'French',
-      coverUrl: 'assets/images/catalog/book-it-ends-with-us.png',
-      splashUrl: 'assets/images/catalog/splash-pink.svg'
-    },
-    {
-      id: 11,
-      title: 'Models',
-      author: 'Mark Manson',
-      year: 2011,
-      status: 'Available',
-      category: 'Non-Fiction',
-      language: 'Italian',
-      coverUrl: 'assets/images/catalog/book-subtle-art.png',
-      splashUrl: 'assets/images/catalog/splash-orange.svg'
-    },
-    {
-      id: 12,
-      title: 'As Good As Dead',
-      author: 'Holly Jackson',
-      year: 2021,
-      status: 'Available',
-      category: 'Thriller',
-      language: 'Spanish',
-      coverUrl: 'assets/images/catalog/book-good-girl-guide.png',
-      splashUrl: 'assets/images/catalog/splash-white.svg'
-    },
-    {
-      id: 13,
-      title: 'The Silent Patient',
-      author: 'Alex Michaelides',
-      year: 2019,
-      status: 'Available',
-      category: 'Thriller',
-      language: 'English',
-      coverUrl: 'assets/images/catalog/book-psychology-money.png',
-      splashUrl: 'assets/images/catalog/splash-green.svg'
-    },
-    {
-      id: 14,
-      title: 'The Alchemist',
-      author: 'Paulo Coelho',
-      year: 1988,
-      status: 'Available',
-      category: 'Fiction',
-      language: 'Polish',
-      coverUrl: 'assets/images/catalog/book-it-ends-with-us.png',
-      splashUrl: 'assets/images/catalog/splash-pink.svg'
-    },
-    {
-      id: 15,
-      title: 'Becoming',
-      author: 'Michelle Obama',
-      year: 2018,
-      status: 'Available',
-      category: 'Biography',
-      language: 'German',
-      coverUrl: 'assets/images/catalog/book-subtle-art.png',
-      splashUrl: 'assets/images/catalog/splash-orange.svg'
-    },
-    {
-      id: 16,
-      title: 'The Hobbit',
-      author: 'J. R. R. Tolkien',
-      year: 1937,
-      status: 'Not available',
-      category: 'Fantasy',
-      language: 'English',
-      coverUrl: 'assets/images/catalog/book-good-girl-guide.png',
-      splashUrl: 'assets/images/catalog/splash-white.svg'
-    },
-    {
-      id: 17,
-      title: '1984',
-      author: 'George Orwell',
-      year: 1949,
-      status: 'Available',
-      category: 'Classic',
-      language: 'Ukrainian',
-      coverUrl: 'assets/images/catalog/book-psychology-money.png',
-      splashUrl: 'assets/images/catalog/splash-green.svg'
-    },
-    {
-      id: 18,
-      title: 'Dune',
-      author: 'Frank Herbert',
-      year: 1965,
-      status: 'Available',
-      category: 'Fiction',
-      language: 'Italian',
-      coverUrl: 'assets/images/catalog/book-it-ends-with-us.png',
-      splashUrl: 'assets/images/catalog/splash-pink.svg'
-    },
-    {
-      id: 19,
-      title: 'The Power of Now',
-      author: 'Eckhart Tolle',
-      year: 1997,
-      status: 'Available',
-      category: 'Health & Wellness',
-      language: 'Spanish',
-      coverUrl: 'assets/images/catalog/book-subtle-art.png',
-      splashUrl: 'assets/images/catalog/splash-orange.svg'
-    },
-    {
-      id: 20,
-      title: 'Little Women',
-      author: 'Louisa May Alcott',
-      year: 1868,
-      status: 'Available',
-      category: 'Classic',
-      language: 'French',
-      coverUrl: 'assets/images/catalog/book-good-girl-guide.png',
-      splashUrl: 'assets/images/catalog/splash-white.svg'
-    },
-    {
-      id: 21,
-      title: 'Educated',
-      author: 'Tara Westover',
-      year: 2018,
-      status: 'Not available',
-      category: 'Biography',
-      language: 'English',
-      coverUrl: 'assets/images/catalog/book-psychology-money.png',
-      splashUrl: 'assets/images/catalog/splash-green.svg'
-    },
-    {
-      id: 22,
-      title: 'The Hunger Games',
-      author: 'Suzanne Collins',
-      year: 2008,
-      status: 'Available',
-      category: 'Young Adult',
-      language: 'German',
-      coverUrl: 'assets/images/catalog/book-it-ends-with-us.png',
-      splashUrl: 'assets/images/catalog/splash-pink.svg'
-    },
-    {
-      id: 23,
-      title: 'Gone Girl',
-      author: 'Gillian Flynn',
-      year: 2012,
-      status: 'Available',
-      category: 'Mystery',
-      language: 'English',
-      coverUrl: 'assets/images/catalog/book-subtle-art.png',
-      splashUrl: 'assets/images/catalog/splash-orange.svg'
-    },
-    {
-      id: 24,
-      title: 'Deep Work',
-      author: 'Cal Newport',
-      year: 2016,
-      status: 'Available',
-      category: 'Self Development',
-      language: 'Polish',
-      coverUrl: 'assets/images/catalog/book-good-girl-guide.png',
-      splashUrl: 'assets/images/catalog/splash-white.svg'
-    }
-  ];
+  categories: string[] = [];
+  languages: string[] = [];
 
-  filteredBooks: CatalogBook[] = [...this.books];
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
   constructor(
     public tokenService: TokenService,
-    private router: Router
+    private router: Router,
+    private booksService: BooksService,
+    private cdr: ChangeDetectorRef
   ) {}
 
+  ngOnInit(): void {
+    this.loadCatalogDictionaries();
+    this.initSearch();
+    this.loadBooks(true);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   get isAdmin(): boolean {
-    return true;
+    return this.tokenService.getUserRole() === 'ADMIN';
   }
 
   get visibleBooks(): CatalogBook[] {
-    return this.filteredBooks.slice(0, this.visibleBooksCount);
+    return this.filteredBooks;
   }
 
   get canLoadMore(): boolean {
-    return this.visibleBooksCount < this.filteredBooks.length;
+    return !this.isLastPage && this.filteredBooks.length > 0 && !this.isLoading;
+  }
+
+  get showEmptyState(): boolean {
+    return !this.isLoading && this.filteredBooks.length === 0;
+  }
+
+  get filteredLanguages(): string[] {
+    const query = this.languageSearchKeyword.trim().toLowerCase();
+
+    if (!query) {
+      return this.languages;
+    }
+
+    return this.languages.filter(language =>
+      language.toLowerCase().includes(query)
+    );
+  }
+
+  onSearchChange(value: string): void {
+    this.searchKeyword = value;
+    this.searchSubject.next(value);
   }
 
   loadMoreBooks(): void {
-    this.visibleBooksCount += this.booksPerLoad;
+    if (!this.isLastPage && !this.isLoading) {
+      this.loadBooks(false);
+    }
   }
 
-  resetVisibleBooks(): void {
-    this.visibleBooksCount = this.booksPerLoad;
+  private initSearch(): void {
+    this.searchSubject
+      .pipe(
+        debounceTime(400),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.loadBooks(true);
+      });
+  }
+
+  private loadCatalogDictionaries(): void {
+    this.booksService.getAvailableGenres()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: genres => {
+          this.categories = genres;
+          this.cdr.detectChanges();
+        },
+        error: error => {
+          console.error('Failed to load genres:', error);
+          this.categories = [];
+        }
+      });
+
+    this.booksService.getAvailableLanguages()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: languages => {
+          this.languages = languages;
+          this.cdr.detectChanges();
+        },
+        error: error => {
+          console.error('Failed to load languages:', error);
+          this.languages = [];
+        }
+      });
+  }
+
+  private loadBooks(reset: boolean): void {
+    if (this.isLoading) {
+      return;
+    }
+
+    if (reset) {
+      this.currentPage = 0;
+      this.isLastPage = false;
+      this.books = [];
+      this.filteredBooks = [];
+    }
+
+    this.isLoading = true;
+
+    this.booksService.filterBooks(
+      {
+        keyword: this.searchKeyword,
+        genres: this.selectedCategories,
+        languages: this.selectedLanguages,
+        status: this.mapAvailabilityToBackendStatus()
+      },
+      this.currentPage,
+      this.booksPerLoad,
+      this.activeSortField ?? 'title',
+      this.activeSortDirection ?? 'asc'
+    )
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: response => {
+          const mappedBooks = response.content.map((book: Book) =>
+            this.mapBookToCatalogBook(book)
+          );
+
+          this.books = reset ? mappedBooks : [...this.books, ...mappedBooks];
+          this.filteredBooks = [...this.books];
+
+          this.isLastPage = response.last;
+          this.currentPage = response.page + 1;
+          this.isLoading = false;
+
+          this.cdr.detectChanges();
+        },
+        error: error => {
+          console.error('Failed to load catalog books:', error);
+
+          this.books = [];
+          this.filteredBooks = [];
+          this.isLastPage = true;
+          this.isLoading = false;
+
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  private mapBookToCatalogBook(book: Book): CatalogBook {
+    return {
+      id: book.id,
+      title: book.title,
+      author: `${book.authorSurname} ${book.authorInitials}`,
+      year: book.publicationYear,
+      status: book.status === 'AVAILABLE' ? 'Available' : 'Not available',
+      category: book.genre || 'General',
+      language: book.language || 'Unknown',
+      coverUrl: this.resolveCoverUrl(book.coverImageUrl),
+      splashUrl: this.getSplashUrl(book.genre)
+    };
+  }
+
+  private resolveCoverUrl(coverImageUrl?: string): string {
+    if (!coverImageUrl || coverImageUrl.includes('example.com')) {
+      return 'assets/images/catalog/book-psychology-money.png';
+    }
+
+    return coverImageUrl;
+  }
+
+  onCoverError(book: CatalogBook): void {
+    book.coverUrl = 'assets/images/catalog/book-psychology-money.png';
+  }
+
+  private mapAvailabilityToBackendStatus(): string | null {
+    if (this.selectedAvailability === 'Available') {
+      return 'AVAILABLE';
+    }
+
+    if (this.selectedAvailability === 'Not available') {
+      return 'OUT_OF_STOCK';
+    }
+
+    return null;
+  }
+
+  private getSplashUrl(genre?: string): string {
+    const normalizedGenre = genre?.toLowerCase() ?? '';
+
+    if (normalizedGenre.includes('romance')) {
+      return 'assets/images/catalog/splash-pink.svg';
+    }
+
+    if (normalizedGenre.includes('psychology') || normalizedGenre.includes('biography')) {
+      return 'assets/images/catalog/splash-green.svg';
+    }
+
+    if (normalizedGenre.includes('mystery') || normalizedGenre.includes('classic')) {
+      return 'assets/images/catalog/splash-white.svg';
+    }
+
+    return 'assets/images/catalog/splash-orange.svg';
   }
 
   openSortModal(): void {
@@ -382,47 +283,12 @@ export class CatalogComponent {
   resetSort(): void {
     this.activeSortField = null;
     this.activeSortDirection = null;
-    this.filteredBooks = [...this.filteredBooks];
-    this.resetVisibleBooks();
+    this.loadBooks(true);
+    this.closeSortModal();
   }
 
   applySort(): void {
-    if (!this.activeSortField || !this.activeSortDirection) {
-      this.closeSortModal();
-      return;
-    }
-
-    this.filteredBooks = [...this.filteredBooks].sort((a, b) => {
-      let firstValue: string | number = '';
-      let secondValue: string | number = '';
-
-      if (this.activeSortField === 'year') {
-        firstValue = a.year;
-        secondValue = b.year;
-      }
-
-      if (this.activeSortField === 'author') {
-        firstValue = a.author.toLowerCase();
-        secondValue = b.author.toLowerCase();
-      }
-
-      if (this.activeSortField === 'title') {
-        firstValue = a.title.toLowerCase();
-        secondValue = b.title.toLowerCase();
-      }
-
-      if (firstValue < secondValue) {
-        return this.activeSortDirection === 'asc' ? -1 : 1;
-      }
-
-      if (firstValue > secondValue) {
-        return this.activeSortDirection === 'asc' ? 1 : -1;
-      }
-
-      return 0;
-    });
-
-    this.resetVisibleBooks();
+    this.loadBooks(true);
     this.closeSortModal();
   }
 
@@ -466,36 +332,29 @@ export class CatalogComponent {
     return this.selectedLanguages.includes(language);
   }
 
+  resetLanguages(): void {
+    this.selectedLanguages = [];
+    this.languageSearchKeyword = '';
+  }
+
   resetFilters(): void {
     this.selectedCategories = [];
     this.selectedAvailability = null;
     this.selectedLanguages = [];
-    this.filteredBooks = [...this.books];
-    this.resetVisibleBooks();
+    this.languageSearchKeyword = '';
+    this.searchKeyword = '';
+
+    this.loadBooks(true);
+    this.closeFilterModal();
   }
 
   applyFilters(): void {
-    this.filteredBooks = this.books.filter(book => {
-      const matchesCategory =
-        this.selectedCategories.length === 0 ||
-        this.selectedCategories.includes(book.category);
-
-      const matchesAvailability =
-        !this.selectedAvailability ||
-        book.status === this.selectedAvailability;
-
-      const matchesLanguage =
-        this.selectedLanguages.length === 0 ||
-        this.selectedLanguages.includes(book.language);
-
-      return matchesCategory && matchesAvailability && matchesLanguage;
-    });
-
-    this.resetVisibleBooks();
+    this.loadBooks(true);
     this.closeFilterModal();
   }
 
   applyLanguages(): void {
+    this.loadBooks(true);
     this.closeLanguageModal();
   }
 
