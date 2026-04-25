@@ -215,7 +215,7 @@ export class CatalogComponent implements OnInit, OnDestroy {
     return {
       id: book.id,
       title: book.title,
-      author: `${book.authorSurname} ${book.authorInitials}`,
+      author: book.authorFullName,
       year: book.publicationYear,
       status: book.status === 'AVAILABLE' ? 'Available' : 'Not available',
       category: book.genre || 'General',

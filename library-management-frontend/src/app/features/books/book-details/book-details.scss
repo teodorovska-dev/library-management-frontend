@@ -38,6 +38,14 @@
     }
   }
 
+  .book-details-state {
+    margin: 32px 0;
+    font-family: 'Kanit', sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+    color: #111111;
+  }
+
   &__hero-grid {
     display: grid;
     grid-template-columns: minmax(520px, 1fr) minmax(360px, 520px);

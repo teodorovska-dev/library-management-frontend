@@ -1,8 +1,10 @@
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { Component, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TokenService } from '../../../core/services/token';
+import { BooksService } from '../../../core/services/books';
+import { Book } from '../../../core/models/book.model';
 
-type UserRole = 'guest' | 'user' | 'admin';
 type BookDetailsModalType = 'delete-confirm' | null;
 
 interface BookDetailsViewModel {
@@ -32,62 +34,113 @@ interface BookDetailsViewModel {
   styleUrls: ['./book-details.scss']
 })
 export class BookDetailsComponent {
-  readonly currentRole = signal<UserRole>('guest');
   readonly isSavedToFavorites = signal<boolean>(false);
   readonly activeModal = signal<BookDetailsModalType>(null);
+  readonly isLoading = signal<boolean>(false);
+  readonly hasError = signal<boolean>(false);
 
   readonly book = signal<BookDetailsViewModel>({
-    id: 1,
-    title: 'The Psychology of Money',
-    author: 'Morgan Housel',
-    description:
-      'The Psychology of Money by Morgan Housel explores how our thoughts, emotions, and habits shape financial decisions. Instead of complex theories, the book shows that success with money depends on behavior, patience, and consistency.\n\nThrough simple insights and real-life examples, it highlights key ideas like long-term thinking, the power of compounding, and the importance of financial independence, helping readers build a healthier relationship with money.',
+    id: 0,
+    title: '',
+    author: '',
+    description: 'No description is available for this book.',
     coverImage: 'assets/images/books/book-details-cover.png',
-    publisher: 'Harriman House',
-    editors: 'Not applicable',
-    format: '21.6 × 13.8 × 2.0 cm',
-    features: 'Full color, 252 pages',
-    languages: ['English'],
-    categories: ['Psychology', 'Finance'],
-    publicationYear: 2020,
-    availableCopies: 12,
-    isbn: '978-0857197689',
-    status: 'Available',
+    publisher: 'Not specified',
+    editors: 'Not specified',
+    format: 'Not specified',
+    features: 'Not specified',
+    languages: [],
+    categories: [],
+    publicationYear: 0,
+    availableCopies: 0,
+    isbn: 'Not specified',
+    status: 'Not available',
     breadcrumbTitle: 'Book Details'
   });
 
-  readonly isGuest = computed(() => this.currentRole() === 'guest');
-  readonly isUser = computed(() => this.currentRole() === 'user');
-  readonly isAdmin = computed(() => this.currentRole() === 'admin');
+  readonly isGuest = computed(() => !this.tokenService.isLoggedIn());
+  readonly isUser = computed(() => this.tokenService.getUserRole() === 'USER');
+  readonly isAdmin = computed(() => this.tokenService.getUserRole() === 'ADMIN');
 
   constructor(
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly tokenService: TokenService,
+    private readonly booksService: BooksService
   ) {
-    this.initializeRole();
-    this.initializeMockBook();
+    this.loadBook();
   }
 
-  private initializeRole(): void {
-    const roleFromQuery = this.route.snapshot.queryParamMap.get('role');
+  private loadBook(): void {
+    const bookId = Number(this.route.snapshot.paramMap.get('id'));
 
-    if (roleFromQuery === 'user' || roleFromQuery === 'admin' || roleFromQuery === 'guest') {
-      this.currentRole.set(roleFromQuery);
+    if (Number.isNaN(bookId) || bookId <= 0) {
+      this.hasError.set(true);
       return;
     }
 
-    this.currentRole.set('guest');
+    this.isLoading.set(true);
+    this.hasError.set(false);
+
+    this.booksService.getBookById(bookId).subscribe({
+      next: book => {
+        this.book.set(this.mapBookToViewModel(book));
+        this.isLoading.set(false);
+      },
+      error: error => {
+        console.error('Failed to load book details:', error);
+        this.hasError.set(true);
+        this.isLoading.set(false);
+      }
+    });
   }
 
-  private initializeMockBook(): void {
-    const bookId = Number(this.route.snapshot.paramMap.get('id'));
+  private mapBookToViewModel(book: Book): BookDetailsViewModel {
+    return {
+      id: book.id,
+      title: book.title,
+      author: book.authorFullName,
+      description: book.description || 'No description is available for this book.',
+      coverImage: this.resolveCoverUrl(book.coverImageUrl),
+      publisher: book.publisher || 'Not specified',
+      editors: 'Not specified',
+      format: 'Printed book',
+      features: `${book.copiesCount} copies in library`,
+      languages: book.language ? [book.language] : ['Unknown'],
+      categories: book.genre ? [book.genre] : ['General'],
+      publicationYear: book.publicationYear,
+      availableCopies: book.status === 'AVAILABLE' ? book.copiesCount : 0,
+      isbn: book.isbn || 'Not specified',
+      status: this.mapStatus(book.status),
+      breadcrumbTitle: book.title
+    };
+  }
 
-    if (!Number.isNaN(bookId) && bookId > 0) {
-      this.book.update(current => ({
-        ...current,
-        id: bookId
-      }));
+  private resolveCoverUrl(coverImageUrl?: string): string {
+    if (!coverImageUrl || coverImageUrl.includes('example.com')) {
+      return 'assets/images/books/book-details-cover.png';
     }
+
+    return coverImageUrl;
+  }
+
+  onCoverError(): void {
+    this.book.update(current => ({
+      ...current,
+      coverImage: 'assets/images/books/book-details-cover.png'
+    }));
+  }
+
+  private mapStatus(status: string): string {
+    if (status === 'AVAILABLE') {
+      return 'Available';
+    }
+
+    if (status === 'OUT_OF_STOCK') {
+      return 'Not available';
+    }
+
+    return 'Written off';
   }
 
   onToggleFavorite(): void {
@@ -103,7 +156,7 @@ export class BookDetailsComponent {
       return;
     }
 
-    this.router.navigate(['/admin/books', this.book().id, 'edit']);
+    this.router.navigate(['/admin/edit-book', this.book().id]);
   }
 
   onDeleteBook(): void {
@@ -119,10 +172,20 @@ export class BookDetailsComponent {
   }
 
   confirmDeleteBook(): void {
-    console.log('Book deleted:', this.book().id);
+    if (!this.isAdmin()) {
+      return;
+    }
 
-    this.activeModal.set(null);
-    this.router.navigate(['/catalog']);
+    this.booksService.writeOffBook(this.book().id).subscribe({
+      next: () => {
+        this.activeModal.set(null);
+        this.router.navigate(['/catalog']);
+      },
+      error: error => {
+        console.error('Failed to write off book:', error);
+        this.activeModal.set(null);
+      }
+    });
   }
 
   onBackToCatalog(): void {

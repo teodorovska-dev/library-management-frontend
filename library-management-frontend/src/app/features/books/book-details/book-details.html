@@ -9,6 +9,14 @@
         <span>{{ book().breadcrumbTitle }}</span>
       </nav>
 
+      <div class="book-details-state" *ngIf="isLoading()">
+        Loading book details...
+      </div>
+
+      <div class="book-details-state" *ngIf="hasError()">
+        Failed to load book details.
+      </div>
+
       <div class="book-details-page__hero-grid">
         <div class="book-details-page__hero-content">
           <h1>DISCOVER EVERY DETAIL OF THIS BOOK</h1>
@@ -36,6 +44,7 @@
               [src]="book().coverImage"
               [alt]="book().title + ' cover'"
               class="book-details-page__cover-image"
+              (error)="onCoverError()"
             />
           </div>
         </div>
