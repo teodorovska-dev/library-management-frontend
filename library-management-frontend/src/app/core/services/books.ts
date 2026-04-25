@@ -13,6 +13,10 @@ export interface BookFilterParams {
   publicationYear?: number | null;
 }
 
+export interface FileUploadResponse {
+  url: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -90,4 +94,14 @@ export class BooksService {
   writeOffBook(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  uploadBookCover(file: File): Observable<FileUploadResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return this.http.post<FileUploadResponse>(
+    `${environment.apiBaseUrl}/files/book-cover`,
+    formData
+  );
+}
 }

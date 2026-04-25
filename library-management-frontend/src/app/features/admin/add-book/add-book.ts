@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { switchMap, of } from 'rxjs';
+import { BooksService } from '../../../core/services/books';
 import { MultiSelectComponent, MultiSelectOption } from '../../../shared/components/multi-select/multi-select';
 
 type AddBookModalType = 'validation-error' | 'success' | null;
@@ -17,34 +19,36 @@ export class AddBookComponent {
   addBookForm: FormGroup;
   selectedCoverName = '';
   coverPreviewUrl: string | null = null;
+  selectedCoverFile: File | null = null;
   isSubmitting = false;
   activeModal: AddBookModalType = null;
 
   readonly languageOptions: MultiSelectOption[] = [
-    { label: 'English', value: 'english' },
-    { label: 'Ukrainian', value: 'ukrainian' },
-    { label: 'Polish', value: 'polish' },
-    { label: 'German', value: 'german' },
-    { label: 'French', value: 'french' },
+    { label: 'English', value: 'English' },
+    { label: 'Ukrainian', value: 'Ukrainian' },
+    { label: 'Polish', value: 'Polish' },
+    { label: 'German', value: 'German' },
+    { label: 'French', value: 'French' },
   ];
 
   readonly categoryOptions: MultiSelectOption[] = [
-    { label: 'Fiction', value: 'fiction' },
-    { label: 'Fantasy', value: 'fantasy' },
-    { label: 'Science', value: 'science' },
-    { label: 'History', value: 'history' },
-    { label: 'Biography', value: 'biography' },
-    { label: 'Romance', value: 'romance' },
-    { label: 'Programming', value: 'programming' },
+    { label: 'Fiction', value: 'Fiction' },
+    { label: 'Fantasy', value: 'Fantasy' },
+    { label: 'Science', value: 'Science' },
+    { label: 'History', value: 'History' },
+    { label: 'Biography', value: 'Biography' },
+    { label: 'Romance', value: 'Romance' },
+    { label: 'Programming', value: 'Programming' },
   ];
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private booksService: BooksService
   ) {
     this.addBookForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(120)]],
-      author: ['', [Validators.required, Validators.maxLength(100)]],
+      author: ['', [Validators.required, Validators.maxLength(150)]],
       publisher: ['', [Validators.required, Validators.maxLength(100)]],
       editors: ['', [Validators.maxLength(150)]],
       publicationYear: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
@@ -59,58 +63,20 @@ export class AddBookComponent {
     });
   }
 
-  get isTitleInvalid(): boolean {
-    const control = this.addBookForm.get('title');
-    return !!control && control.invalid && control.touched;
-  }
+  get isTitleInvalid(): boolean { return this.isInvalid('title'); }
+  get isAuthorInvalid(): boolean { return this.isInvalid('author'); }
+  get isPublisherInvalid(): boolean { return this.isInvalid('publisher'); }
+  get isPublicationYearInvalid(): boolean { return this.isInvalid('publicationYear'); }
+  get isIsbnInvalid(): boolean { return this.isInvalid('isbn'); }
+  get isFormatInvalid(): boolean { return this.isInvalid('format'); }
+  get isFeaturesInvalid(): boolean { return this.isInvalid('features'); }
+  get isLanguagesInvalid(): boolean { return this.isInvalid('languages'); }
+  get isCategoryInvalid(): boolean { return this.isInvalid('category'); }
+  get isDescriptionInvalid(): boolean { return this.isInvalid('description'); }
+  get isAvailableCopiesInvalid(): boolean { return this.isInvalid('availableCopies'); }
 
-  get isAuthorInvalid(): boolean {
-    const control = this.addBookForm.get('author');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isPublisherInvalid(): boolean {
-    const control = this.addBookForm.get('publisher');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isPublicationYearInvalid(): boolean {
-    const control = this.addBookForm.get('publicationYear');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isIsbnInvalid(): boolean {
-    const control = this.addBookForm.get('isbn');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isFormatInvalid(): boolean {
-    const control = this.addBookForm.get('format');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isFeaturesInvalid(): boolean {
-    const control = this.addBookForm.get('features');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isLanguagesInvalid(): boolean {
-    const control = this.addBookForm.get('languages');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isCategoryInvalid(): boolean {
-    const control = this.addBookForm.get('category');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isDescriptionInvalid(): boolean {
-    const control = this.addBookForm.get('description');
-    return !!control && control.invalid && control.touched;
-  }
-
-  get isAvailableCopiesInvalid(): boolean {
-    const control = this.addBookForm.get('availableCopies');
+  private isInvalid(controlName: string): boolean {
+    const control = this.addBookForm.get(controlName);
     return !!control && control.invalid && control.touched;
   }
 
@@ -122,6 +88,7 @@ export class AddBookComponent {
       return;
     }
 
+    this.selectedCoverFile = file;
     this.selectedCoverName = file.name;
     this.addBookForm.patchValue({ cover: file });
 
@@ -141,12 +108,48 @@ export class AddBookComponent {
 
     this.isSubmitting = true;
 
-    console.log('Book form data:', this.addBookForm.value);
+    const upload$ = this.selectedCoverFile
+      ? this.booksService.uploadBookCover(this.selectedCoverFile)
+      : of({ url: '' });
 
-    setTimeout(() => {
-      this.isSubmitting = false;
-      this.openModal('success');
-    }, 600);
+    upload$
+      .pipe(
+        switchMap(uploadResponse => {
+          const request = this.mapFormToBookRequest(uploadResponse.url);
+          return this.booksService.createBook(request);
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          this.openModal('success');
+        },
+        error: error => {
+          console.error('Failed to create book:', error);
+          this.isSubmitting = false;
+          this.openModal('validation-error');
+        }
+      });
+  }
+
+  private mapFormToBookRequest(coverImageUrl: string) {
+    const value = this.addBookForm.value;
+
+    const selectedLanguages = value.languages as string[];
+    const selectedCategories = value.category as string[];
+
+    return {
+      title: value.title.trim(),
+      authorFullName: value.author.trim(),
+      publicationYear: Number(value.publicationYear),
+      copiesCount: Number(value.availableCopies),
+      genre: selectedCategories[0],
+      language: selectedLanguages[0],
+      isbn: value.isbn.trim(),
+      publisher: value.publisher.trim(),
+      description: value.description.trim(),
+      coverImageUrl
+    };
   }
 
   openModal(type: AddBookModalType): void {
@@ -171,6 +174,7 @@ export class AddBookComponent {
 
     this.selectedCoverName = '';
     this.coverPreviewUrl = null;
+    this.selectedCoverFile = null;
   }
 
   onCancel(): void {
