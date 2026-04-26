@@ -6,6 +6,7 @@ import { BooksService } from '../../../core/services/books';
 import { Book } from '../../../core/models/book.model';
 import { FavoritesService } from '../../../core/services/favorites';
 
+
 type BookDetailsModalType = 'delete-confirm' | null;
 
 interface BookDetailsViewModel {
@@ -87,7 +88,9 @@ export class BookDetailsComponent {
     this.booksService.getBookById(bookId).subscribe({
       next: book => {
         this.book.set(this.mapBookToViewModel(book));
-        this.loadFavoriteStatus(book.id);
+        if (this.isUser()) {
+          this.loadFavoriteStatus(book.id);
+        }
         this.isLoading.set(false);
       },
       error: error => {
@@ -122,6 +125,10 @@ export class BookDetailsComponent {
   private resolveCoverUrl(coverImageUrl?: string): string {
     if (!coverImageUrl || coverImageUrl.includes('example.com')) {
       return 'assets/images/books/book-details-cover.png';
+    }
+
+    if (coverImageUrl.startsWith('/uploads')) {
+      return `http://localhost:8082${coverImageUrl}`;
     }
 
     return coverImageUrl;

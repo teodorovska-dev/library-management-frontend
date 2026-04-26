@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { NgFor, NgIf, NgClass, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+import { NgClass, NgFor, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -7,6 +7,7 @@ import { TokenService } from '../../../core/services/token';
 import { FavoritesService } from '../../../core/services/favorites';
 import { Book } from '../../../core/models/book.model';
 import { DashboardService, AdminDashboardStats } from '../../../core/services/dashboard';
+import { UserProfileService } from '../../../core/services/user-profile';
 
 type ProfileModalType = 'success' | 'validation-error' | 'logout-confirm' | null;
 type DashboardTrend = 'increase' | 'decrease' | 'neutral';
@@ -42,7 +43,7 @@ interface DashboardStat {
     ReactiveFormsModule
   ],
   templateUrl: './user-profile.html',
-  styleUrls: ['./user-profile.scss'],
+  styleUrls: ['./user-profile.scss']
 })
 export class UserProfileComponent {
   isAdmin = false;
@@ -53,6 +54,9 @@ export class UserProfileComponent {
 
   avatarPreviewUrl = 'assets/images/profile/user-icon.svg';
   selectedAvatarName = '';
+  selectedAvatarFile: File | null = null;
+
+  profileErrorMessage = '';
 
   profileForm: FormGroup;
 
@@ -65,6 +69,7 @@ export class UserProfileComponent {
     private tokenService: TokenService,
     private favoritesService: FavoritesService,
     private dashboardService: DashboardService,
+    private userProfileService: UserProfileService,
     private cdr: ChangeDetectorRef
   ) {
     this.profileForm = this.fb.group({
@@ -72,17 +77,11 @@ export class UserProfileComponent {
       lastName: ['', [Validators.required, Validators.maxLength(60)]],
       email: ['', [Validators.required, Validators.email]],
       status: ['', [Validators.required]],
-      avatar: [null],
+      avatar: [null]
     });
 
     this.initializeProfile();
     this.profileForm.disable();
-
-    if (this.isAdmin) {
-      this.loadDashboardStats();
-    } else {
-      this.loadFavorites();
-    }
   }
 
   get fullName(): string {
@@ -113,6 +112,37 @@ export class UserProfileComponent {
   }
 
   private initializeProfile(): void {
+    this.userProfileService.getCurrentProfile().subscribe({
+      next: user => {
+        this.isAdmin = user.role === 'ADMIN';
+
+        this.profileForm.patchValue({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          status: this.isAdmin ? 'Administrator' : 'User'
+        });
+
+        this.avatarPreviewUrl = this.resolveAvatarUrl(user.avatarUrl);
+
+        this.tokenService.updateUserData({
+          userId: user.userId,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role
+        });
+
+        this.syncProfileData();
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Failed to load profile:', error);
+        this.initializeProfileFromTokenFallback();
+      }
+    });
+  }
+
+  private initializeProfileFromTokenFallback(): void {
     const user = this.tokenService.getUser();
 
     this.isAdmin = user?.role === 'ADMIN';
@@ -120,15 +150,23 @@ export class UserProfileComponent {
     const fullName = user?.fullName || '';
     const nameParts = fullName.trim().split(' ').filter(Boolean);
 
-    const firstName = nameParts[0] || '';
-    const lastName = nameParts.slice(1).join(' ') || '';
-
     this.profileForm.patchValue({
-      firstName,
-      lastName,
+      firstName: nameParts[0] || '',
+      lastName: nameParts.slice(1).join(' ') || '',
       email: user?.email || '',
       status: this.isAdmin ? 'Administrator' : 'User'
     });
+
+    this.syncProfileData();
+    this.cdr.detectChanges();
+  }
+
+  private syncProfileData(): void {
+    if (this.isAdmin) {
+      this.loadDashboardStats();
+    } else {
+      this.loadFavorites();
+    }
   }
 
   private loadFavorites(): void {
@@ -208,11 +246,36 @@ export class UserProfileComponent {
 
   private mapDashboardStats(stats: AdminDashboardStats): DashboardStat[] {
     return [
-      { label: 'Total books', value: stats.totalBooks, trend: 'neutral' },
-      { label: 'Total titles', value: stats.totalTitles, trend: 'neutral' },
-      { label: 'Total authors', value: stats.totalAuthors, trend: 'neutral' },
-      { label: 'Written-off books', value: stats.writtenOffBooks, trend: 'neutral' },
-      { label: 'Available copies', value: stats.availableCopies, trend: 'neutral' },
+      {
+        label: 'Total books',
+        value: stats.totalBooks.value,
+        trend: stats.totalBooks.trend,
+        change: stats.totalBooks.change
+      },
+      {
+        label: 'Total titles',
+        value: stats.totalTitles.value,
+        trend: stats.totalTitles.trend,
+        change: stats.totalTitles.change
+      },
+      {
+        label: 'Total authors',
+        value: stats.totalAuthors.value,
+        trend: stats.totalAuthors.trend,
+        change: stats.totalAuthors.change
+      },
+      {
+        label: 'Written-off books',
+        value: stats.writtenOffBooks.value,
+        trend: stats.writtenOffBooks.trend,
+        change: stats.writtenOffBooks.change
+      },
+      {
+        label: 'Available copies',
+        value: stats.availableCopies.value,
+        trend: stats.availableCopies.trend,
+        change: stats.availableCopies.change
+      }
     ];
   }
 
@@ -238,6 +301,7 @@ export class UserProfileComponent {
       return;
     }
 
+    this.selectedAvatarFile = file;
     this.selectedAvatarName = file.name;
     this.profileForm.patchValue({ avatar: file });
 
@@ -258,19 +322,107 @@ export class UserProfileComponent {
 
     if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
+      this.profileErrorMessage = 'Please fill in required fields correctly.';
       this.openModal('validation-error');
       return;
     }
 
     this.isSaving = true;
+    this.profileErrorMessage = '';
 
-    setTimeout(() => {
-      this.isSaving = false;
-      this.isEditing = false;
-      this.profileForm.disable();
-      this.openModal('success');
-      this.cdr.detectChanges();
-    }, 600);
+    const payload = {
+      firstName: this.profileForm.get('firstName')?.value.trim(),
+      lastName: this.profileForm.get('lastName')?.value.trim(),
+      email: this.profileForm.get('email')?.value.trim()
+    };
+
+    this.userProfileService.updateCurrentProfile(payload).subscribe({
+      next: user => {
+        if (this.selectedAvatarFile) {
+          this.uploadAvatarAfterProfileSave();
+          return;
+        }
+
+        this.finishSuccessfulProfileSave(user);
+      },
+      error: error => {
+        console.error('Failed to update profile:', error);
+        this.isSaving = false;
+        this.profileErrorMessage =
+          error?.error?.message || 'Failed to update profile. Please try again.';
+        this.openModal('validation-error');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private uploadAvatarAfterProfileSave(): void {
+    if (!this.selectedAvatarFile) {
+      return;
+    }
+
+    this.userProfileService.uploadAvatar(this.selectedAvatarFile).subscribe({
+      next: user => {
+        this.finishSuccessfulProfileSave(user);
+      },
+      error: error => {
+        console.error('Failed to upload avatar:', error);
+        this.isSaving = false;
+        this.profileErrorMessage = 'Profile was updated, but avatar upload failed.';
+        this.openModal('validation-error');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private finishSuccessfulProfileSave(user: {
+    firstName: string;
+    lastName: string;
+    fullName: string;
+    email: string;
+    role: string;
+    userId: number;
+    avatarUrl?: string;
+  }): void {
+    this.tokenService.updateUserData({
+      userId: user.userId,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role
+    });
+
+    this.isAdmin = user.role === 'ADMIN';
+
+    this.profileForm.patchValue({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      status: this.isAdmin ? 'Administrator' : 'User'
+    });
+
+    this.avatarPreviewUrl = this.resolveAvatarUrl(user.avatarUrl);
+    this.selectedAvatarFile = null;
+    this.selectedAvatarName = '';
+
+    this.isSaving = false;
+    this.isEditing = false;
+    this.profileForm.disable();
+
+    this.openModal('success');
+    this.syncProfileData();
+    this.cdr.detectChanges();
+  }
+
+  private resolveAvatarUrl(avatarUrl?: string): string {
+    if (!avatarUrl) {
+      return 'assets/images/profile/user-icon.svg';
+    }
+
+    if (avatarUrl.startsWith('/uploads')) {
+      return `http://localhost:8082${avatarUrl}`;
+    }
+
+    return avatarUrl;
   }
 
   onLogout(): void {

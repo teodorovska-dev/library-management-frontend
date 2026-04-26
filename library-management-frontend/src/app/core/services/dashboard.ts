@@ -3,12 +3,20 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
+export type DashboardTrend = 'increase' | 'decrease' | 'neutral';
+
+export interface DashboardTrendStat {
+  value: number;
+  trend: DashboardTrend;
+  change: number;
+}
+
 export interface AdminDashboardStats {
-  totalBooks: number;
-  totalTitles: number;
-  totalAuthors: number;
-  writtenOffBooks: number;
-  availableCopies: number;
+  totalBooks: DashboardTrendStat;
+  totalTitles: DashboardTrendStat;
+  totalAuthors: DashboardTrendStat;
+  writtenOffBooks: DashboardTrendStat;
+  availableCopies: DashboardTrendStat;
 }
 
 @Injectable({

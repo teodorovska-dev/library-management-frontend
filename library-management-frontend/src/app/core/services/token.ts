@@ -65,4 +65,16 @@ export class TokenService {
     sessionStorage.removeItem(this.TOKEN_KEY);
     sessionStorage.removeItem(this.USER_KEY);
   }
+
+  updateUserData(user: {
+    userId: number;
+    fullName: string;
+    email: string;
+    role: string;
+  }): void {
+    const storageMode = localStorage.getItem(this.STORAGE_MODE_KEY);
+    const storage = storageMode === 'session' ? sessionStorage : localStorage;
+
+    storage.setItem(this.USER_KEY, JSON.stringify(user));
+  }
 }
