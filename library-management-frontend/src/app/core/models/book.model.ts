@@ -10,6 +10,7 @@ export interface Book {
   publisher: string;
   description: string;
   coverImageUrl: string;
+  splashColor?: string;
   status: string;
 
   createdById?: number;

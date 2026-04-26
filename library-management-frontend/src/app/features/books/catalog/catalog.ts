@@ -19,7 +19,7 @@ interface CatalogBook {
   category: string;
   language: string;
   coverUrl: string;
-  splashUrl: string;
+  splashColor: string;
 }
 
 @Component({
@@ -221,13 +221,17 @@ export class CatalogComponent implements OnInit, OnDestroy {
       category: book.genre || 'General',
       language: book.language || 'Unknown',
       coverUrl: this.resolveCoverUrl(book.coverImageUrl),
-      splashUrl: this.getSplashUrl(book.genre)
+      splashColor: book.splashColor || '#d8ddd2'
     };
   }
 
   private resolveCoverUrl(coverImageUrl?: string): string {
     if (!coverImageUrl || coverImageUrl.includes('example.com')) {
       return 'assets/images/catalog/book-psychology-money.png';
+    }
+
+    if (coverImageUrl.startsWith('/uploads')) {
+      return `http://localhost:8082${coverImageUrl}`;
     }
 
     return coverImageUrl;
@@ -247,24 +251,6 @@ export class CatalogComponent implements OnInit, OnDestroy {
     }
 
     return null;
-  }
-
-  private getSplashUrl(genre?: string): string {
-    const normalizedGenre = genre?.toLowerCase() ?? '';
-
-    if (normalizedGenre.includes('romance')) {
-      return 'assets/images/catalog/splash-pink.svg';
-    }
-
-    if (normalizedGenre.includes('psychology') || normalizedGenre.includes('biography')) {
-      return 'assets/images/catalog/splash-green.svg';
-    }
-
-    if (normalizedGenre.includes('mystery') || normalizedGenre.includes('classic')) {
-      return 'assets/images/catalog/splash-white.svg';
-    }
-
-    return 'assets/images/catalog/splash-orange.svg';
   }
 
   openSortModal(): void {

@@ -26,6 +26,7 @@ interface BookDetailsViewModel {
   isbn: string;
   status: string;
   breadcrumbTitle: string;
+  splashColor: string;
 }
 
 @Component({
@@ -57,7 +58,8 @@ export class BookDetailsComponent {
     availableCopies: 0,
     isbn: 'Not specified',
     status: 'Not available',
-    breadcrumbTitle: 'Book Details'
+    breadcrumbTitle: 'Book Details',
+    splashColor: '#d8ddd2',
   });
 
   readonly isGuest = computed(() => !this.tokenService.isLoggedIn());
@@ -118,7 +120,8 @@ export class BookDetailsComponent {
       availableCopies: book.status === 'AVAILABLE' ? book.copiesCount : 0,
       isbn: book.isbn || 'Not specified',
       status: this.mapStatus(book.status),
-      breadcrumbTitle: book.title
+      breadcrumbTitle: book.title,
+      splashColor: book.splashColor || '#d8ddd2',
     };
   }
 
@@ -180,7 +183,7 @@ onToggleFavorite(): void {
       return;
     }
 
-    this.router.navigate(['/admin/edit-book', this.book().id]);
+    this.router.navigate(['/admin/books', this.book().id, 'edit']);
   }
 
   onDeleteBook(): void {

@@ -58,8 +58,10 @@
           (click)="openDetails(book.id)"
         >
           <div class="catalog-book__visual">
-            <img class="catalog-book__splash" [src]="book.splashUrl" alt="" />
-
+            <div
+              class="catalog-book__splash"
+              [style.--splash-color]="book.splashColor"
+            ></div>
             <img
               class="catalog-book__cover"
               [src]="book.coverUrl"

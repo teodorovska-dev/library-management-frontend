@@ -359,30 +359,17 @@
 
   &__splash {
     position: absolute;
-    inset: auto 50% 4px auto;
-    width: 300px;
-    height: 220px;
+    inset: auto 51% -10% auto;
+    width: 510px;
+    height: 380px;
     transform: translateX(50%);
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
+    background: var(--splash-color, #d8ddd2);
+
+    mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
+    -webkit-mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
+
+    filter: brightness(1.2);
     pointer-events: none;
-
-    &--green {
-      background-image: url('/assets/images/home/splash-green.png');
-    }
-
-    &--pink {
-      background-image: url('/assets/images/home/splash-pink.png');
-    }
-
-    &--orange {
-      background-image: url('/assets/images/home/splash-orange.png');
-    }
-
-    &--white {
-      background-image: url('/assets/images/home/splash-white.png');
-    }
   }
 
   img {
@@ -391,7 +378,7 @@
     max-width: 220px;
     max-height: 300px;
     object-fit: contain;
-    filter: drop-shadow(0 24px 28px rgba(0, 0, 0, 0.36));
+    filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.422));
   }
 
   h3 {

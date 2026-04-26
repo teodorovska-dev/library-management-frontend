@@ -19,7 +19,7 @@ interface FavoriteBook {
   year: number;
   status: string;
   coverUrl: string;
-  splashUrl: string;
+  splashColor: string;
 }
 
 interface DashboardStat {
@@ -197,7 +197,7 @@ export class UserProfileComponent {
       year: book.publicationYear,
       status: book.status === 'AVAILABLE' ? 'Available' : 'Not available',
       coverUrl: this.resolveCoverUrl(book.coverImageUrl),
-      splashUrl: this.getSplashUrl(book.genre)
+      splashColor: book.splashColor || '#d8ddd2'
     };
   }
 

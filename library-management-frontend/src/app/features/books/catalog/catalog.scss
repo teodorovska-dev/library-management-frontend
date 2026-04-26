@@ -216,10 +216,14 @@
 
   &__splash {
     position: absolute;
-    width: 124%;
-    max-width: none;
-    height: 92%;
-    object-fit: contain;
+    width: 154%;
+    height: 122%;
+    background: var(--splash-color, #d8ddd2);
+
+    mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
+    -webkit-mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
+
+    filter: brightness(1.2);
     z-index: 1;
     pointer-events: none;
   }

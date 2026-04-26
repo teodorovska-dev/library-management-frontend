@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { switchMap, of } from 'rxjs';
 import { BooksService } from '../../../core/services/books';
 import { MultiSelectComponent, MultiSelectOption } from '../../../shared/components/multi-select/multi-select';
+import { CoverColorService } from '../../../core/services/cover-color';
 
 type AddBookModalType = 'validation-error' | 'success' | null;
 
@@ -44,7 +45,8 @@ export class AddBookComponent {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private booksService: BooksService
+    private booksService: BooksService,
+    private coverColorService: CoverColorService
   ) {
     this.addBookForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(120)]],
@@ -114,9 +116,13 @@ export class AddBookComponent {
 
     upload$
       .pipe(
-        switchMap(uploadResponse => {
-          const request = this.mapFormToBookRequest(uploadResponse.url);
-          return this.booksService.createBook(request);
+        switchMap(async uploadResponse => {
+          const splashColor = await this.coverColorService.extractDominantColor(
+          this.coverPreviewUrl || uploadResponse.url
+          );
+
+          const request = this.mapFormToBookRequest(uploadResponse.url, splashColor);
+          return this.booksService.createBook(request).toPromise();
         })
       )
       .subscribe({
@@ -132,25 +138,26 @@ export class AddBookComponent {
       });
   }
 
-  private mapFormToBookRequest(coverImageUrl: string) {
-    const value = this.addBookForm.value;
+private mapFormToBookRequest(coverImageUrl: string, splashColor: string) {
+  const value = this.addBookForm.value;
 
-    const selectedLanguages = value.languages as string[];
-    const selectedCategories = value.category as string[];
+  const selectedLanguages = value.languages as string[];
+  const selectedCategories = value.category as string[];
 
-    return {
-      title: value.title.trim(),
-      authorFullName: value.author.trim(),
-      publicationYear: Number(value.publicationYear),
-      copiesCount: Number(value.availableCopies),
-      genre: selectedCategories[0],
-      language: selectedLanguages[0],
-      isbn: value.isbn.trim(),
-      publisher: value.publisher.trim(),
-      description: value.description.trim(),
-      coverImageUrl
-    };
-  }
+  return {
+    title: value.title.trim(),
+    authorFullName: value.author.trim(),
+    publicationYear: Number(value.publicationYear),
+    copiesCount: Number(value.availableCopies),
+    genre: selectedCategories[0],
+    language: selectedLanguages[0],
+    isbn: value.isbn.trim(),
+    publisher: value.publisher.trim(),
+    description: value.description.trim(),
+    coverImageUrl,
+    splashColor
+  };
+}
 
   openModal(type: AddBookModalType): void {
     this.activeModal = type;

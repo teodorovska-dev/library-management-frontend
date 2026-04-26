@@ -364,10 +364,16 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 292px;
-    height: 232px;
+    width: 362px;
+    height: 302px;
     object-fit: contain;
     transform: translate(-50%, -50%);
+    background: var(--splash-color, #d8ddd2);
+
+    mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
+    -webkit-mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
+
+    filter: brightness(1.2);
     z-index: 1;
     pointer-events: none;
   }
@@ -378,7 +384,7 @@
     width: 140px;
     height: 212px;
     object-fit: cover;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.593);
   }
 
   &__content {
@@ -491,9 +497,9 @@
       z-index: 2;
       min-width: 64px;
       text-align: center;
-      font-family: 'Abhaya Libre', serif;
-      font-size: 30px;
-      font-weight: 600;
+      font-family: 'Kanit', sans-serif;
+      font-size: 26px;
+      font-weight: 400;
       line-height: 1;
       color: #ffffff;
       margin-top: 35px;

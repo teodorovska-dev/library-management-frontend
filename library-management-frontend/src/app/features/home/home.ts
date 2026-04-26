@@ -1,10 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { BooksService } from '../../core/services/books';
 import { Book } from '../../core/models/book.model';
-
-type SplashType = 'green' | 'pink' | 'orange' | 'white';
 
 interface TrendingBook {
   id: number;
@@ -13,13 +11,13 @@ interface TrendingBook {
   year: number;
   status: string;
   coverUrl: string;
-  splashType: SplashType;
+  splashColor: string;
 }
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [NgFor, NgIf, NgClass, RouterModule],
+  imports: [NgFor, NgIf, RouterModule],
   templateUrl: './home.html',
   styleUrls: ['./home.scss']
 })
@@ -117,7 +115,7 @@ export class HomeComponent implements OnInit {
       year: book.publicationYear,
       status: book.status === 'AVAILABLE' ? 'Available' : 'Not available',
       coverUrl: this.resolveCoverUrl(book.coverImageUrl),
-      splashType: this.getSplashType(book.genre)
+      splashColor: book.splashColor || '#d8ddd2'
     };
   }
 
@@ -133,28 +131,4 @@ export class HomeComponent implements OnInit {
     return coverImageUrl;
   }
 
-  private getSplashType(genre?: string): SplashType {
-    const normalizedGenre = genre?.toLowerCase() ?? '';
-
-    if (normalizedGenre.includes('romance')) {
-      return 'pink';
-    }
-
-    if (
-      normalizedGenre.includes('finance') ||
-      normalizedGenre.includes('psychology') ||
-      normalizedGenre.includes('biography')
-    ) {
-      return 'green';
-    }
-
-    if (
-      normalizedGenre.includes('mystery') ||
-      normalizedGenre.includes('classic')
-    ) {
-      return 'white';
-    }
-
-    return 'orange';
-  }
 }

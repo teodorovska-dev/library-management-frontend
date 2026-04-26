@@ -135,13 +135,18 @@
     margin-right: 300px;
   }
 
-  &__pink-splash {
+  &__splash {
     position: absolute;
     inset: 50% auto auto 50%;
-    width: 670px;
-    height: 610px;
+    width: 700px;
+    height: 640px;
     transform: translate(-50%, -50%);
-    background: url('/assets/images/books/book-details-pink-splash.png') center / contain no-repeat;
+    background: var(--splash-color, #d8ddd2);
+
+    mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
+    -webkit-mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
+
+    filter: brightness(1.2);
     opacity: 0.92;
     pointer-events: none;
   }
@@ -158,6 +163,7 @@
     width: 100%;
     height: auto;
     object-fit: cover;
+    transform: scale(1.5);
   }
 }
 
@@ -694,7 +700,7 @@
       width: 248px;
     }
 
-    &__pink-splash {
+    &__splash {
       width: 440px;
       height: 440px;
     }
