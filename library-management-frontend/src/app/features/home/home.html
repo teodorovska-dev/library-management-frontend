@@ -25,7 +25,7 @@
           src="assets/images/home/hero-books.png"
           alt="Books composition"
           class="home-hero__image"
-      />
+        />
       </div>
     </div>
   </section>
@@ -95,15 +95,45 @@
           </p>
         </div>
 
-        <div class="trending-books__grid">
-          <article class="trending-card" *ngFor="let book of trendingBooks()">
+        <div class="trending-books__state" *ngIf="isTrendingLoading">
+          <div class="trending-books__skeleton" *ngFor="let item of [1, 2, 3, 4]">
+            <div class="trending-books__skeleton-cover"></div>
+            <div class="trending-books__skeleton-title"></div>
+            <div class="trending-books__skeleton-meta"></div>
+          </div>
+        </div>
+
+        <div class="trending-books__message" *ngIf="hasTrendingError && !isTrendingLoading">
+          Failed to load trending books. Please try again later.
+        </div>
+
+        <div
+          class="trending-books__message"
+          *ngIf="!hasTrendingError && !isTrendingLoading && trendingBooks().length === 0"
+        >
+          No trending books available yet.
+        </div>
+
+        <div
+          class="trending-books__grid"
+          *ngIf="!isTrendingLoading && !hasTrendingError && trendingBooks().length > 0"
+        >
+          <article
+            class="trending-card"
+            *ngFor="let book of trendingBooks()"
+            (click)="openBookDetails(book.id)"
+          >
             <div class="trending-card__visual">
               <div
                 class="trending-card__splash"
                 [ngClass]="'trending-card__splash--' + book.splashType"
               ></div>
 
-              <img [src]="book.coverUrl" [alt]="book.title" />
+              <img
+                [src]="book.coverUrl"
+                [alt]="book.title"
+                (error)="onCoverError(book)"
+              />
             </div>
 
             <h3>{{ book.title }}</h3>
@@ -118,10 +148,14 @@
           </article>
         </div>
 
-        <div class="trending-books__controls">
+        <div class="trending-books__controls" *ngIf="canSlide">
           <button type="button" aria-label="Previous book" (click)="prevSlide()">
             ←
           </button>
+
+          <span class="trending-books__page-indicator">
+            {{ currentTrendingPage() + 1 }} / {{ totalTrendingPages() }}
+          </span>
 
           <button type="button" aria-label="Next book" (click)="nextSlide()">
             →
@@ -197,7 +231,6 @@
           <a routerLink="/">Home</a>
           <a routerLink="/catalog">Catalog</a>
           <a href="#about">About us</a>
-          <a routerLink="/favorites">Favourites</a>
           <a routerLink="/profile">My profile</a>
         </nav>
 

@@ -104,4 +104,11 @@ export class BooksService {
     formData
   );
 }
+  getTrendingBooks(page: number, size: number): Observable<PagedResponse<Book>> {
+  const params = new HttpParams()
+    .set('page', page)
+    .set('size', size);
+
+  return this.http.get<PagedResponse<Book>>(`${this.apiUrl}/trending`, { params });
+}
 }

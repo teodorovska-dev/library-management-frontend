@@ -1,6 +1,10 @@
-import { Component, signal } from '@angular/core';
-import { NgClass, NgFor } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Component, OnInit, signal } from '@angular/core';
+import { NgClass, NgFor, NgIf } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
+import { BooksService } from '../../core/services/books';
+import { Book } from '../../core/models/book.model';
+
+type SplashType = 'green' | 'pink' | 'orange' | 'white';
 
 interface TrendingBook {
   id: number;
@@ -9,75 +13,148 @@ interface TrendingBook {
   year: number;
   status: string;
   coverUrl: string;
-  splashType: 'green' | 'pink' | 'orange' | 'white';
+  splashType: SplashType;
 }
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [NgFor, NgClass, RouterModule],
+  imports: [NgFor, NgIf, NgClass, RouterModule],
   templateUrl: './home.html',
-  styleUrls: ['./home.scss'],
+  styleUrls: ['./home.scss']
 })
-export class HomeComponent {
-  trendingBooks = signal<TrendingBook[]>([
-    {
-      id: 1,
-      title: 'THE PSYCHOLOGY OF MONEY',
-      author: 'Morgan Housel',
-      year: 2020,
-      status: 'Available',
-      coverUrl: 'assets/images/home/trending-book-1.png',
-      splashType: 'green',
-    },
-    {
-      id: 2,
-      title: 'IT ENDS WITH US',
-      author: 'Colleen Hoover',
-      year: 2016,
-      status: 'Available',
-      coverUrl: 'assets/images/home/trending-book-2.png',
-      splashType: 'pink',
-    },
-    {
-      id: 3,
-      title: 'THE SUBTLE ART OF NOT GIVING A F*CK',
-      author: 'Mark Manson',
-      year: 2016,
-      status: 'Available',
-      coverUrl: 'assets/images/home/trending-book-3.png',
-      splashType: 'orange',
-    },
-    {
-      id: 4,
-      title: "A GOOD GIRL'S GUIDE TO MURDER",
-      author: 'Holly Jackson',
-      year: 2019,
-      status: 'Available',
-      coverUrl: 'assets/images/home/trending-book-4.png',
-      splashType: 'white',
-    },
-  ]);
+export class HomeComponent implements OnInit {
+  trendingBooks = signal<TrendingBook[]>([]);
 
-  currentIndex = signal(0);
+  readonly booksPerPage = 4;
+
+  currentTrendingPage = signal(0);
+  totalTrendingPages = signal(0);
+
+  isTrendingLoading = false;
+  hasTrendingError = false;
+
+  constructor(
+    private booksService: BooksService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.loadTrendingBooks(0);
+  }
+
+  get canSlide(): boolean {
+    return this.totalTrendingPages() > 1;
+  }
 
   nextSlide(): void {
-    const booksCount = this.trendingBooks().length;
-
-    if (booksCount === 0) {
+    if (!this.canSlide || this.isTrendingLoading) {
       return;
     }
 
-    this.currentIndex.update((index) => (index + 1) % booksCount);
+    const nextPage =
+      this.currentTrendingPage() + 1 >= this.totalTrendingPages()
+        ? 0
+        : this.currentTrendingPage() + 1;
+
+    this.loadTrendingBooks(nextPage);
   }
 
   prevSlide(): void {
-    const booksCount = this.trendingBooks().length;
-
-    if (booksCount === 0) {
+    if (!this.canSlide || this.isTrendingLoading) {
       return;
     }
 
-    this.currentIndex.update((index) => (index - 1 + booksCount) % booksCount);
+    const previousPage =
+      this.currentTrendingPage() - 1 < 0
+        ? this.totalTrendingPages() - 1
+        : this.currentTrendingPage() - 1;
+
+    this.loadTrendingBooks(previousPage);
+  }
+
+  openBookDetails(bookId: number): void {
+    this.router.navigate(['/books', bookId]);
+  }
+
+  onCoverError(book: TrendingBook): void {
+    book.coverUrl = 'assets/images/books/book-details-cover.png';
+  }
+
+  private loadTrendingBooks(page: number): void {
+    this.isTrendingLoading = true;
+    this.hasTrendingError = false;
+
+    this.booksService.getTrendingBooks(page, this.booksPerPage).subscribe({
+      next: response => {
+        this.trendingBooks.set(
+          response.content.map(book => this.mapBookToTrendingBook(book))
+        );
+
+        this.currentTrendingPage.set(response.page);
+        this.totalTrendingPages.set(response.totalPages);
+
+        this.isTrendingLoading = false;
+      },
+      error: error => {
+        console.error('Failed to load trending books:', error);
+
+        this.trendingBooks.set([]);
+        this.currentTrendingPage.set(0);
+        this.totalTrendingPages.set(0);
+
+        this.isTrendingLoading = false;
+        this.hasTrendingError = true;
+      }
+    });
+  }
+
+  private mapBookToTrendingBook(book: Book): TrendingBook {
+    return {
+      id: book.id,
+      title: book.title,
+      author: book.authorFullName,
+      year: book.publicationYear,
+      status: book.status === 'AVAILABLE' ? 'Available' : 'Not available',
+      coverUrl: this.resolveCoverUrl(book.coverImageUrl),
+      splashType: this.getSplashType(book.genre)
+    };
+  }
+
+  private resolveCoverUrl(coverImageUrl?: string): string {
+    if (!coverImageUrl || coverImageUrl.includes('example.com')) {
+      return 'assets/images/books/book-details-cover.png';
+    }
+
+    if (coverImageUrl.startsWith('/uploads')) {
+      return `http://localhost:8082${coverImageUrl}`;
+    }
+
+    return coverImageUrl;
+  }
+
+  private getSplashType(genre?: string): SplashType {
+    const normalizedGenre = genre?.toLowerCase() ?? '';
+
+    if (normalizedGenre.includes('romance')) {
+      return 'pink';
+    }
+
+    if (
+      normalizedGenre.includes('finance') ||
+      normalizedGenre.includes('psychology') ||
+      normalizedGenre.includes('biography')
+    ) {
+      return 'green';
+    }
+
+    if (
+      normalizedGenre.includes('mystery') ||
+      normalizedGenre.includes('classic')
+    ) {
+      return 'white';
+    }
+
+    return 'orange';
   }
 }
