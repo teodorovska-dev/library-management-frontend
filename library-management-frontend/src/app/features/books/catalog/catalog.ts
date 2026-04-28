@@ -349,6 +349,6 @@ export class CatalogComponent implements OnInit, OnDestroy {
   }
 
   goToAddBook(): void {
-    this.router.navigate(['/admin/add-book']);
+    this.router.navigate(['/admin/books', 'add']);
   }
 }

@@ -3,10 +3,45 @@
   background: #ffffff;
   padding: 0 32px 40px;
   overflow-x: hidden;
+  
+  &__paint {
+  position: absolute;
+  z-index: 7;
+  pointer-events: none;
+  object-fit: contain;
+
+  &--left {
+    top: 65px;
+    left: -120px;
+    width: 450px;
+    height: 450px;
+    transform: rotate(-12deg);
+  }
+
+  &--right {
+    top: -180px;
+    right: 60px;
+    width: 420px;
+    height: 400px;
+    transform: rotate(175deg);
+  }
+
+    &--bottom-right {
+      z-index: 1;
+      right: -185px;
+      bottom: -220px;
+      width: 550px;
+      height: 550px;
+      transform: rotate(-25deg);
+    }
+  }
+
 
   &__hero {
     padding: 18px 0 32px;
     text-align: center;
+    position: relative;
+    z-index: 2;
   }
 
   &__hero-content {
@@ -45,7 +80,8 @@
     background: #000000;
     border-radius: 32px;
     padding: 48px;
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12);
+    position: relative;
+    z-index: 8;
     overflow: hidden;
   }
 
@@ -459,8 +495,8 @@
     overflow: hidden;
     background-image: url('/assets/images/profile/black-splash.svg');
     background-repeat: no-repeat;
-    background-position: 240% 20%;
-    background-size: 200px 170px;
+    background-position: -70% 28%;
+    background-size: 300px 250px;
 
     h3 {
       margin: 0 0 8px;
@@ -498,12 +534,12 @@
       min-width: 64px;
       text-align: center;
       font-family: 'Kanit', sans-serif;
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 400;
       line-height: 1;
       color: #ffffff;
-      margin-top: 35px;
-      margin-right: 15px;
+      margin-top: 44px;
+      margin-right: 0px;
     }
   }
 
@@ -692,28 +728,103 @@
   .user-profile-page {
     padding: 0 24px 32px;
 
+    &__paint {
+      &--left {
+        left: -180px;
+        width: 380px;
+        height: 380px;
+      }
+
+      &--right {
+        right: -80px;
+        width: 360px;
+        height: 360px;
+      }
+    }
+
     &__shell {
-      padding: 40px 32px 32px;
+      padding: 40px 32px 40px;
     }
 
     &__grid {
       grid-template-columns: 1fr;
-      gap: 48px;
+      gap: 56px;
     }
   }
 
   .profile-panel {
-    max-width: 620px;
+    width: 100%;
+    max-width: 680px;
   }
 
   .favorite-books {
-    padding-right: 0;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
     column-gap: 40px;
+    padding-right: 0;
   }
 
   .admin-dashboard {
     &__stats {
-      grid-template-columns: repeat(2, 188px);
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    &__stat-card {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .user-profile-page {
+    &__shell {
+      border-radius: 28px;
+      padding: 36px 28px;
+    }
+
+    &__paint--bottom-right {
+      right: -240px;
+      bottom: -260px;
+      width: 480px;
+      height: 480px;
+    }
+  }
+
+  .favorite-books {
+    grid-template-columns: repeat(2, minmax(200px, 1fr));
+    row-gap: 36px;
+  }
+
+  .admin-dashboard {
+    &__stats {
+      grid-template-columns: 1fr;
+      justify-items: start;
+    }
+
+    &__stat-card {
+      width: 400px;
+      max-width: 100%;
+      height: 120px;
+      padding: 20px 18px;
+      background-position: 240% 20%;
+      background-size: 330px 280px;
+
+      h3 {
+        max-width: 170px;
+        font-size: 18px;
+      }
+
+      p {
+        max-width: 150px;
+        font-size: 12px;
+      }
+
+      strong {
+        color: #ffffff;
+        margin-top: 44px;
+        margin-right: 22px;
+        font-size: 24px;
+      }
     }
   }
 }
@@ -722,111 +833,138 @@
   .user-profile-page {
     padding: 0 16px 24px;
 
-    &__hero-content h1 {
-      font-size: 30px;
+    &__paint {
+      &--left,
+      &--right {
+        display: none;
+      }
+    }
+
+    &__hero {
+      padding: 16px 0 28px;
+    }
+
+    &__hero-content {
+      h1 {
+        font-size: 30px;
+      }
+
+      p {
+        font-size: 13px;
+      }
     }
 
     &__shell {
       border-radius: 24px;
-      padding: 32px 20px 24px;
+      padding: 32px 20px 28px;
     }
 
-    &__section-header h2 {
-      font-size: 30px;
+    &__grid {
+      gap: 44px;
+    }
+
+    &__section-header {
+      margin-bottom: 24px;
+
+      h2 {
+        font-size: 30px;
+      }
+
+      p {
+        font-size: 13px;
+      }
     }
   }
 
   .profile-card {
     padding: 20px 16px;
 
+    &__info {
+      padding: 24px 18px;
+    }
+
     &__info-grid {
       grid-template-columns: 1fr;
-      row-gap: 16px;
-    }
-
-    &__stats {
-      height: auto;
-      min-height: 72px;
-      padding: 16px;
-      align-items: center;
-
-      span {
-        font-size: 16px;
-      }
-    }
-
-    &__actions {
-      flex-wrap: wrap;
     }
   }
 
   .favorite-books {
     grid-template-columns: 1fr;
-    row-gap: 36px;
   }
 
   .admin-dashboard {
     &__stats {
       grid-template-columns: 1fr;
-      gap: 20px;
+      justify-items: start;
+      gap: 24px;
     }
 
     &__stat-card {
-      width: 100%;
-      max-width: 260px;
+      width: 400px;
+      max-width: 100%;
+      height: 120px;
+      padding: 20px 18px;
+      background-position: 240% 20%;
+      background-size: 330px 280px;
     }
 
     &__action-grid {
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      max-width: 400px;
     }
   }
+}
 
-  .profile-modal {
-    max-width: 100%;
-    border-radius: 24px;
-    padding: 20px 16px 24px;
-
-    &__message {
-      font-size: 16px;
-    }
-
-    &__actions--two {
-      gap: 12px;
-    }
-
-    &__button {
+@media (max-width: 560px) {
+  .admin-dashboard {
+    &__stat-card {
       width: 100%;
-      min-width: unset;
+      height: 116px;
+      background-position: 210% 20%;
+      background-size: 300px 250px;
     }
   }
 }
 
 @media (max-width: 480px) {
-  .profile-card {
-    &__identity {
-      height: 128px;
+  .user-profile-page {
+    padding: 0 12px 20px;
+
+    &__hero-content h1 {
+      font-size: 26px;
     }
 
-    &__stats {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-    }
-
-    &__button {
-      width: 100%;
-    }
-  }
-
-  .favorite-book-card {
-    &__cover-wrap {
-      width: 100%;
+    &__shell {
+      padding: 28px 14px;
     }
   }
 
   .admin-dashboard {
+    &__stat-card {
+      height: 112px;
+      background-position: 165% 20%;
+      background-size: 260px 220px;
+    }
+
+    &__action-grid {
+      grid-template-columns: 1fr;
+    }
+
     &__action-card {
       width: 100%;
+    }
+  }
+}
+
+@media (max-width: 380px) {
+  .admin-dashboard {
+    &__stat-card {
+      height: 108px;
+      padding: 18px 14px;
+      background-position: 145% 20%;
+      background-size: 235px 200px;
     }
   }
 }

@@ -1,167 +1,253 @@
 <section class="home-page">
+
+      <img
+        src="assets/images/shared/book-splash-mask.png"
+        alt=""
+        class="home-page__outside-splash home-page__outside-splash--right"
+      />
+
   <section class="home-hero" id="home">
-    <div class="home-hero__inner">
-      <div class="home-hero__content">
-        <h1>
-          LIFE IS TOO<br />
-          SHORT TO LOSE<br />
-          TRACK OF YOUR<br />
-          BOOKS
-        </h1>
+  <div class="home-hero__panel">
 
-        <p>
-          Organize your book collection, track availability, and manage records
-          with ease.
-        </p>
+    <img
+      src="assets/images/shared/book-splash-white.png"
+      alt=""
+      class="home-hero__splash home-hero__splash--top"
+    />
 
-        <a routerLink="/catalog" class="home-page__circle-link">
-          <span>VIEW CATALOG</span>
-          <span class="home-page__circle-link-icon">→</span>
-        </a>
-      </div>
+    <img
+      src="assets/images/shared/book-splash-white.png"
+      alt=""
+      class="home-hero__splash home-hero__splash--bottom"
+    />
 
-      <div class="home-hero__visual">
-        <img
-          src="assets/images/home/hero-books.png"
-          alt="Books composition"
-          class="home-hero__image"
-        />
-      </div>
+    <img
+      src="assets/images/shared/book-splash-white.png"
+      alt=""
+      class="home-hero__splash home-hero__splash--right"
+    />
+
+    <div class="home-hero__content">
+      <h1>
+        LIFE IS TOO<br />
+        SHORT TO LOSE<br />
+        TRACK OF YOUR<br />
+        BOOKS
+      </h1>
+
+      <p>
+        Organize your book collection, track availability,<br />
+        and manage records with ease.
+      </p>
+
+      <a routerLink="/catalog" class="home-page__circle-link home-page__circle-link--light">
+        <span>VIEW CATALOG</span>
+        <span class="home-page__circle-link-icon">→</span>
+      </a>
     </div>
-  </section>
+
+    <div class="home-hero__visual">
+      <img
+        src="assets/images/home/hero-books.png"
+        alt="Books composition"
+        class="home-hero__image"
+      />
+    </div>
+  </div>
+</section>
 
   <section class="home-dark-section">
     <div class="home-dark-section__top-wave"></div>
 
     <div class="home-dark-section__container" id="about">
-      <section class="about-system">
-        <div class="about-system__content">
-          <h2>ABOUT OUR SYSTEM</h2>
+      <section class="our-features">
+        <div class="our-features__header">
+          <div class="our-features__title-block">
+            <h2>OUR FEATURES</h2>
 
-          <p>
-            This Library Management System is designed to simplify the process
-            of organizing, tracking, and managing book collections. It provides
-            a structured and efficient way to maintain records, monitor
-            availability, and access information instantly.
-          </p>
-
-          <div class="about-system__features">
-            <article class="about-feature">
-              <img src="assets/images/home/collection-icon.svg" alt="" />
-              <h3>Organized Collection</h3>
-              <p>Keep every book and record neatly arranged.</p>
-            </article>
-
-            <article class="about-feature">
-              <img src="assets/images/home/search-icon.svg" alt="" />
-              <h3>Smart Search</h3>
-              <p>Find books instantly by title, author, or year.</p>
-            </article>
-
-            <article class="about-feature">
-              <img src="assets/images/home/manage-icon.svg" alt="" />
-              <h3>Easy Management</h3>
-              <p>Add, edit, or remove books in just a few minutes.</p>
-            </article>
-
-            <article class="about-feature">
-              <img src="assets/images/home/overview-icon.svg" alt="" />
-              <h3>Insightful Overview</h3>
-              <p>Get clear reports and track your library growth.</p>
-            </article>
+            <p>
+              This Library Management System is designed to simplify the process
+              of organizing, tracking, and managing book collections. It
+              provides a structured and efficient way to maintain records,
+              monitor availability, and access information instantly.
+            </p>
           </div>
 
-          <a routerLink="/catalog" class="home-page__circle-link home-page__circle-link--light">
-            <span>READ MORE</span>
+          <a routerLink="/catalog" class="home-page__circle-link home-page__circle-link--dark">
+            <span>EXPLORE MORE</span>
             <span class="home-page__circle-link-icon">→</span>
           </a>
+
         </div>
 
-        <div class="about-system__decor">
-          <img
-            src="assets/images/home/about-books-collage.png"
-            alt="Books collage"
-          />
+        <div class="our-features__grid">
+          <article class="feature-card feature-card--image-left">
+            <div class="feature-card__image">
+              <img src="assets/images/home/features/organized-collection.png" alt="" />
+            </div>
+
+            <div class="feature-card__content">
+              <img src="assets/images/home/collection-icon.svg" alt="" />
+              <h3>ORGANIZED<br />COLLECTION</h3>
+              <span></span>
+              <p>Keep every book and record neatly arranged for easy access.</p>
+            </div>
+          </article>
+
+          <article class="feature-card feature-card--image-right">
+            <div class="feature-card__content">
+              <img src="assets/images/home/search-icon.svg" alt="" />
+              <h3>SMART SEARCH</h3>
+              <span></span>
+              <p>Find books instantly by title, author, or year with powerful search.</p>
+            </div>
+
+            <div class="feature-card__image">
+              <img src="assets/images/home/features/smart-search.png" alt="" />
+            </div>
+          </article>
+
+          <article class="feature-card feature-card--image-right">
+            <div class="feature-card__content">
+              <img src="assets/images/home/manage-icon.svg" alt="" />
+              <h3>EASY<br />MANAGEMENT</h3>
+              <span></span>
+              <p>Add, edit, or remove books in just a few simple steps.</p>
+            </div>
+
+            <div class="feature-card__image">
+              <img src="assets/images/home/features/easy-management.png" alt="" />
+            </div>
+          </article>
+
+          <article class="feature-card feature-card--image-right">
+            <div class="feature-card__content">
+              <img src="assets/images/home/overview-icon.svg" alt="" />
+              <h3>INSIGHTFUL<br />OVERVIEW</h3>
+              <span></span>
+              <p>Get clear reports and analytics to track your library growth.</p>
+            </div>
+
+            <div class="feature-card__image">
+              <img src="assets/images/home/features/insightful-overview.png" alt="" />
+            </div>
+          </article>
+
+          <article class="feature-card feature-card--image-left">
+            <div class="feature-card__image">
+              <img src="assets/images/home/features/secure-reliable.png" alt="" />
+            </div>
+
+            <div class="feature-card__content">
+              <img src="assets/images/home/secure-icon.svg" alt="" />
+              <h3>SECURE &<br />RELIABLE</h3>
+              <span></span>
+              <p>Your data is protected with secure storage and backup.</p>
+            </div>
+          </article>
+
+          <article class="feature-card feature-card--image-left">
+            <div class="feature-card__content">
+              <img src="assets/images/home/user-friendly-icon.svg" alt="" />
+              <h3>USER FRIENDLY</h3>
+              <span></span>
+              <p>Intuitive design that makes managing your library effortless.</p>
+            </div>
+
+            <div class="feature-card__image">
+              <img src="assets/images/home/features/user-friendly.png" alt="" />
+            </div>
+          </article>
         </div>
       </section>
 
       <section class="trending-books" id="trending">
-        <div class="trending-books__header">
-          <h2>TRENDING BOOKS</h2>
+  <div class="trending-books__header">
+    <h2>TRENDING BOOKS</h2>
 
-          <p>
-            Discover what everyone is reading right now and explore the most
-            popular books loved by our community.
-          </p>
+    <p>
+      Discover what everyone is reading right now and explore the most popular books loved by our community.
+      Find new favorites, follow current trends, and discover stories that entertain.
+    </p>
+  </div>
+
+  <div class="trending-books__panel">
+    <div class="trending-books__state" *ngIf="isTrendingLoading">
+      <div class="trending-books__skeleton" *ngFor="let item of [1, 2, 3, 4]">
+        <div class="trending-books__skeleton-cover"></div>
+        <div class="trending-books__skeleton-title"></div>
+        <div class="trending-books__skeleton-meta"></div>
+      </div>
+    </div>
+
+    <div class="trending-books__message" *ngIf="hasTrendingError && !isTrendingLoading">
+      Failed to load trending books. Please try again later.
+    </div>
+
+    <div
+      class="trending-books__message"
+      *ngIf="!hasTrendingError && !isTrendingLoading && trendingBooks().length === 0"
+    >
+      No trending books available yet.
+    </div>
+
+    <div
+      class="trending-books__grid"
+      *ngIf="!isTrendingLoading && !hasTrendingError && trendingBooks().length > 0"
+    >
+      <article
+        class="trending-card"
+        *ngFor="let book of visibleTrendingBooks()"
+        (click)="openBookDetails(book.id)"
+      >
+        <div class="trending-card__visual">
+          <div
+            class="trending-card__splash"
+            [style.--splash-color]="book.splashColor"
+          ></div>
+
+          <img
+            [src]="book.coverUrl"
+            [alt]="book.title"
+            (error)="onCoverError(book)"
+          />
         </div>
 
-        <div class="trending-books__state" *ngIf="isTrendingLoading">
-          <div class="trending-books__skeleton" *ngFor="let item of [1, 2, 3, 4]">
-            <div class="trending-books__skeleton-cover"></div>
-            <div class="trending-books__skeleton-title"></div>
-            <div class="trending-books__skeleton-meta"></div>
-          </div>
-        </div>
+        <h3>{{ book.title }}</h3>
 
-        <div class="trending-books__message" *ngIf="hasTrendingError && !isTrendingLoading">
-          Failed to load trending books. Please try again later.
-        </div>
+        <p>
+          By {{ book.author }}
+          <span>•</span>
+          {{ book.year }}
+          <span>•</span>
+          {{ book.status }}
+        </p>
+      </article>
+    </div>
 
-        <div
-          class="trending-books__message"
-          *ngIf="!hasTrendingError && !isTrendingLoading && trendingBooks().length === 0"
-        >
-          No trending books available yet.
-        </div>
+    <div class="trending-books__controls" *ngIf="canSlide">
+      <button type="button" aria-label="Previous book" (click)="prevSlide()">
+        <img
+          class="trending-books__arrow trending-books__arrow--prev"
+          src="assets/images/shared/arrow-icon.svg"
+          alt=""
+        />
+      </button>
 
-        <div
-          class="trending-books__grid"
-          *ngIf="!isTrendingLoading && !hasTrendingError && trendingBooks().length > 0"
-        >
-          <article
-            class="trending-card"
-            *ngFor="let book of trendingBooks()"
-            (click)="openBookDetails(book.id)"
-          >
-            <div class="trending-card__visual">
-              <div
-                class="trending-card__splash"
-                [style.--splash-color]="book.splashColor"
-              ></div>
+      <span class="trending-books__page-indicator">
+        {{ currentTrendingIndex() + 1 }} / {{ totalTrendingSteps() }}
+      </span>
 
-              <img
-                [src]="book.coverUrl"
-                [alt]="book.title"
-                (error)="onCoverError(book)"
-              />
-            </div>
-
-            <h3>{{ book.title }}</h3>
-
-            <p>
-              By {{ book.author }}
-              <span>•</span>
-              {{ book.year }}
-              <span>•</span>
-              {{ book.status }}
-            </p>
-          </article>
-        </div>
-
-        <div class="trending-books__controls" *ngIf="canSlide">
-          <button type="button" aria-label="Previous book" (click)="prevSlide()">
-            ←
-          </button>
-
-          <span class="trending-books__page-indicator">
-            {{ currentTrendingPage() + 1 }} / {{ totalTrendingPages() }}
-          </span>
-
-          <button type="button" aria-label="Next book" (click)="nextSlide()">
-            →
-          </button>
-        </div>
-      </section>
+      <button type="button" aria-label="Next book" (click)="nextSlide()">
+        <img
+          class="trending-books__arrow trending-books__arrow--next"
+          src="assets/images/shared/arrow-icon.svg"
+          alt=""
+        />
+      </button>
+    </div>
+  </div>
+</section>
     </div>
 
     <div class="home-dark-section__bottom-wave"></div>

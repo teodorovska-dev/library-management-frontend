@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { BooksService } from '../../core/services/books';
@@ -24,10 +24,22 @@ interface TrendingBook {
 export class HomeComponent implements OnInit {
   trendingBooks = signal<TrendingBook[]>([]);
 
-  readonly booksPerPage = 4;
+  readonly visibleTrendingCount = 4;
+  readonly trendingFetchLimit = 20;
 
-  currentTrendingPage = signal(0);
-  totalTrendingPages = signal(0);
+  currentTrendingIndex = signal(0);
+
+  visibleTrendingBooks = computed(() => {
+    const start = this.currentTrendingIndex();
+    return this.trendingBooks().slice(start, start + this.visibleTrendingCount);
+  });
+
+  totalTrendingSteps = computed(() => {
+    return Math.max(
+      this.trendingBooks().length - this.visibleTrendingCount + 1,
+      1
+    );
+  });
 
   isTrendingLoading = false;
   hasTrendingError = false;
@@ -38,11 +50,11 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadTrendingBooks(0);
+    this.loadTrendingBooks();
   }
 
   get canSlide(): boolean {
-    return this.totalTrendingPages() > 1;
+    return this.trendingBooks().length > this.visibleTrendingCount;
   }
 
   nextSlide(): void {
@@ -50,12 +62,9 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    const nextPage =
-      this.currentTrendingPage() + 1 >= this.totalTrendingPages()
-        ? 0
-        : this.currentTrendingPage() + 1;
-
-    this.loadTrendingBooks(nextPage);
+    this.currentTrendingIndex.update(index =>
+      index + 1 >= this.totalTrendingSteps() ? 0 : index + 1
+    );
   }
 
   prevSlide(): void {
@@ -63,12 +72,9 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    const previousPage =
-      this.currentTrendingPage() - 1 < 0
-        ? this.totalTrendingPages() - 1
-        : this.currentTrendingPage() - 1;
-
-    this.loadTrendingBooks(previousPage);
+    this.currentTrendingIndex.update(index =>
+      index - 1 < 0 ? this.totalTrendingSteps() - 1 : index - 1
+    );
   }
 
   openBookDetails(bookId: number): void {
@@ -79,27 +85,24 @@ export class HomeComponent implements OnInit {
     book.coverUrl = 'assets/images/books/book-details-cover.png';
   }
 
-  private loadTrendingBooks(page: number): void {
+  private loadTrendingBooks(): void {
     this.isTrendingLoading = true;
     this.hasTrendingError = false;
 
-    this.booksService.getTrendingBooks(page, this.booksPerPage).subscribe({
+    this.booksService.getTrendingBooks(0, this.trendingFetchLimit).subscribe({
       next: response => {
         this.trendingBooks.set(
           response.content.map(book => this.mapBookToTrendingBook(book))
         );
 
-        this.currentTrendingPage.set(response.page);
-        this.totalTrendingPages.set(response.totalPages);
-
+        this.currentTrendingIndex.set(0);
         this.isTrendingLoading = false;
       },
       error: error => {
         console.error('Failed to load trending books:', error);
 
         this.trendingBooks.set([]);
-        this.currentTrendingPage.set(0);
-        this.totalTrendingPages.set(0);
+        this.currentTrendingIndex.set(0);
 
         this.isTrendingLoading = false;
         this.hasTrendingError = true;
@@ -130,5 +133,4 @@ export class HomeComponent implements OnInit {
 
     return coverImageUrl;
   }
-
 }

@@ -1,58 +1,78 @@
 <section class="book-details-page">
   <div class="book-details-page__hero">
-    <div class="book-details-page__hero-inner">
-      <nav class="book-details-page__breadcrumbs" aria-label="Breadcrumb">
-        <a routerLink="/">Home</a>
-        <span>/</span>
-        <a routerLink="/catalog">Catalog</a>
-        <span>/</span>
-        <span>{{ book().breadcrumbTitle }}</span>
-      </nav>
+    <div class="book-details-page__hero-panel">
+      <img
+        src="assets/images/shared/book-splash-white.png"
+        alt=""
+        class="book-details-page__hero-splash book-details-page__hero-splash--top"
+      />
 
-      <div class="book-details-state" *ngIf="isLoading()">
-        Loading book details...
+      <img
+        src="assets/images/shared/book-splash-white.png"
+        alt=""
+        class="book-details-page__hero-splash book-details-page__hero-splash--bottom"
+      />
+
+      <img
+        src="assets/images/shared/book-splash-white.png"
+        alt=""
+        class="book-details-page__hero-splash book-details-page__hero-splash--right"
+      />
+
+      <div class="book-details-page__hero-content">
+        <h1>
+          DISCOVER<br />
+          EVERY DETAIL<br />
+          OF THIS BOOK
+        </h1>
+
+        <p>
+          Access complete book information,<br />
+          monitor availability, and explore this title.
+        </p>
+
+        <button
+          type="button"
+          class="book-details-page__hero-link"
+          (click)="onScrollToDetails()"
+        >
+          <span class="book-details-page__hero-link-text">ABOUT BOOK</span>
+          <span class="book-details-page__hero-link-circle">→</span>
+        </button>
       </div>
 
-      <div class="book-details-state" *ngIf="hasError()">
-        Failed to load book details.
-      </div>
+      <div class="book-details-page__hero-visual">
+        <div
+          class="book-details-page__splash"
+          [style.--splash-color]="book().splashColor"
+        ></div>
 
-      <div class="book-details-page__hero-grid">
-        <div class="book-details-page__hero-content">
-          <h1>DISCOVER EVERY DETAIL OF THIS BOOK</h1>
-
-          <p>
-            Access complete book information, monitor availability, and explore
-            the essential details of this title in a clean and structured interface
-          </p>
-
-          <button
-            type="button"
-            class="book-details-page__hero-link"
-            (click)="onScrollToDetails()"
-          >
-            <span class="book-details-page__hero-link-text">ABOUT BOOK</span>
-            <span class="book-details-page__hero-link-circle">→</span>
-          </button>
-        </div>
-
-        <div class="book-details-page__hero-visual">
-          <div class="book-details-page__splash"[style.--splash-color]="book().splashColor"></div>
-
-          <div class="book-details-page__cover-frame">
-            <img
-              [src]="book().coverImage"
-              [alt]="book().title + ' cover'"
-              class="book-details-page__cover-image"
-              (error)="onCoverError()"
-            />
-          </div>
+        <div class="book-details-page__cover-frame">
+          <img
+            [src]="book().coverImage"
+            [alt]="book().title + ' cover'"
+            class="book-details-page__cover-image"
+            (error)="onCoverError()"
+          />
         </div>
       </div>
     </div>
   </div>
 
   <section id="about-book-section" class="about-book-section">
+
+   <img
+    class="about-book-section__paint about-book-section__paint--left"
+    src="assets/images/shared/book-splash-mask.png"
+    alt=""
+  />
+
+  <img
+    class="about-book-section__paint about-book-section__paint--right"
+    src="assets/images/shared/book-splash-mask.png"
+    alt=""
+  />
+
     <div class="about-book-section__container">
       <div class="about-book-section__header">
         <h2>ABOUT THIS BOOK</h2>
@@ -147,8 +167,6 @@
 
       <div class="about-book-section__footer">
         <div class="about-book-section__footer-actions" *ngIf="isUser() || isAdmin()">
-          
-          <!-- USER -->
           <button
             *ngIf="isUser()"
             type="button"
@@ -166,7 +184,6 @@
             />
           </button>
 
-          <!-- ADMIN -->
           <ng-container *ngIf="isAdmin()">
             <button
               type="button"
@@ -205,7 +222,6 @@
     </div>
   </section>
 
-  <!-- DELETE MODAL -->
   <div
     class="book-details-modal-overlay"
     *ngIf="activeModal() === 'delete-confirm'"

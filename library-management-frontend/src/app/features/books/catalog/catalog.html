@@ -1,105 +1,119 @@
 <section class="catalog-page">
-  <div class="catalog-page__top">
-    <div class="catalog-page__breadcrumbs">
-      <a routerLink="/">Home</a>
-      <span>/</span>
-      <span>Catalog</span>
+  <img
+    class="catalog-page__paint catalog-page__paint--left"
+    src="assets/images/shared/book-splash-mask.png"
+    alt=""
+  />
+
+  <img
+    class="catalog-page__paint catalog-page__paint--right"
+    src="assets/images/shared/book-splash-mask.png"
+    alt=""
+  />
+
+  <div class="catalog-page__hero">
+    <div class="catalog-page__hero-content">
+      <h1>EXPLORE OUR LIBRARY</h1>
+      <p>Find books, discover new titles, and manage your reading journey</p>
     </div>
   </div>
 
-  <div class="catalog-page__shell">
-    <div class="catalog-page__content">
-      <div class="catalog-page__header">
-        <div class="catalog-page__title-block">
-          <h1>BOOK CATALOG</h1>
+  <div class="catalog-page__container">
+    <div class="catalog-page__shell">
+      <div class="catalog-page__content">
+        <div class="catalog-page__header">
+          <div class="catalog-page__title-block">
+            <h1>BOOK CATALOG</h1>
 
-          <div class="catalog-search">
-            <img src="assets/images/catalog/search-icon.svg" alt="" />
-            <input
-              type="text"
-              [(ngModel)]="searchKeyword"
-              (ngModelChange)="onSearchChange($event)"
-              placeholder="Search book name, author, edition..."
-            />
-          </div>
-        </div>
-
-        <div class="catalog-page__actions">
-          <button
-            type="button"
-            class="catalog-action"
-            *ngIf="isAdmin"
-            (click)="goToAddBook()"
-          >
-            <img 
-              class="catalog-action__icon catalog-action__icon--add"
-              src="assets/images/catalog/add-book-icon.svg" 
-              alt="" 
-            />
-            ADD BOOK
-          </button>
-
-          <button type="button" class="catalog-action" (click)="openSortModal()">
-            <img src="assets/images/catalog/sort-icon.svg" alt="" />
-            SORT BY
-          </button>
-
-          <button type="button" class="catalog-action" (click)="openFilterModal()">
-            <img src="assets/images/catalog/filter-icon.svg" alt="" />
-            FILTER
-          </button>
-        </div>
-      </div>
-
-      <div class="catalog-grid" *ngIf="visibleBooks.length > 0">
-        <article
-          class="catalog-book"
-          *ngFor="let book of visibleBooks"
-          (click)="openDetails(book.id)"
-        >
-          <div class="catalog-book__visual">
-            <div
-              class="catalog-book__splash"
-              [style.--splash-color]="book.splashColor"
-            ></div>
-            <img
-              class="catalog-book__cover"
-              [src]="book.coverUrl"
-              [alt]="book.title"
-              (error)="onCoverError(book)"
-            />
-          </div>
-
-          <div class="catalog-book__info">
-            <h2>{{ book.title }}</h2>
-
-            <div class="catalog-book__meta">
-              <span>By {{ book.author }}</span>
-              <span>•</span>
-              <span>{{ book.year }}</span>
-              <span>•</span>
-              <span>{{ book.status }}</span>
+            <div class="catalog-search">
+              <img src="assets/images/catalog/search-icon.svg" alt="" />
+              <input
+                type="text"
+                [(ngModel)]="searchKeyword"
+                (ngModelChange)="onSearchChange($event)"
+                placeholder="Search book name, author, edition..."
+              />
             </div>
           </div>
-        </article>
-      </div>
 
-      <div class="catalog-loading" *ngIf="isLoading">
-        Loading books...
-      </div>
+          <div class="catalog-page__actions">
+            <button
+              type="button"
+              class="catalog-action"
+              *ngIf="isAdmin"
+              (click)="goToAddBook()"
+            >
+              <img
+                class="catalog-action__icon catalog-action__icon--add"
+                src="assets/images/catalog/add-book-icon.svg"
+                alt=""
+              />
+              ADD BOOK
+            </button>
 
-      <div class="catalog-loading" *ngIf="isLoading && searchKeyword">
-        Searching...
-      </div>
+            <button type="button" class="catalog-action" (click)="openSortModal()">
+              <img src="assets/images/catalog/sort-icon.svg" alt="" />
+              SORT BY
+            </button>
 
-      <div class="catalog-empty" *ngIf="showEmptyState">
-        No books match the selected filters.
-      </div>
+            <button type="button" class="catalog-action" (click)="openFilterModal()">
+              <img src="assets/images/catalog/filter-icon.svg" alt="" />
+              FILTER
+            </button>
+          </div>
+        </div>
 
-      <div class="catalog-load-more" *ngIf="canLoadMore">
-        <button type="button" (click)="loadMoreBooks()">
-          LOAD MORE
-        </button>
+        <div class="catalog-grid" *ngIf="visibleBooks.length > 0">
+          <article
+            class="catalog-book"
+            *ngFor="let book of visibleBooks"
+            (click)="openDetails(book.id)"
+          >
+            <div class="catalog-book__visual">
+              <div
+                class="catalog-book__splash"
+                [style.--splash-color]="book.splashColor"
+              ></div>
+
+              <img
+                class="catalog-book__cover"
+                [src]="book.coverUrl"
+                [alt]="book.title"
+                (error)="onCoverError(book)"
+              />
+            </div>
+
+            <div class="catalog-book__info">
+              <h2>{{ book.title }}</h2>
+
+              <div class="catalog-book__meta">
+                <span>By {{ book.author }}</span>
+                <span>•</span>
+                <span>{{ book.year }}</span>
+                <span>•</span>
+                <span>{{ book.status }}</span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="catalog-loading" *ngIf="isLoading && !searchKeyword">
+          Loading books...
+        </div>
+
+        <div class="catalog-loading" *ngIf="isLoading && searchKeyword">
+          Searching...
+        </div>
+
+        <div class="catalog-empty" *ngIf="showEmptyState">
+          No books match the selected filters.
+        </div>
+
+        <div class="catalog-load-more" *ngIf="canLoadMore">
+          <button type="button" (click)="loadMoreBooks()">
+            LOAD MORE
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -121,17 +135,21 @@
 
       <img
         class="catalog-sort-modal__paint catalog-sort-modal__paint--top"
-        src="assets/images/catalog/sort-paint-top.svg"
+        src="assets/images/shared/book-splash-mask.png"
         alt=""
       />
 
       <img
         class="catalog-sort-modal__paint catalog-sort-modal__paint--right"
-        src="assets/images/catalog/sort-paint-right.svg"
+        src="assets/images/shared/book-splash-mask.png"
         alt=""
       />
 
       <h2>SORT BY</h2>
+
+      <p class="catalog-sort-modal__subtitle">
+        Choose one sorting option for the catalog view
+      </p>
 
       <div class="catalog-sort-modal__divider"></div>
 
@@ -241,12 +259,23 @@
       </button>
 
       <img
-        class="catalog-filter-modal__paint"
-        src="assets/images/catalog/filter-paint.png"
+        class="catalog-filter-modal__paint catalog-filter-modal__paint--top"
+        src="assets/images/shared/book-splash-mask.png"
+        alt=""
+      />
+
+      <img
+        class="catalog-filter-modal__paint catalog-filter-modal__paint--right"
+        src="assets/images/shared/book-splash-mask.png"
         alt=""
       />
 
       <h2>FILTER</h2>
+
+      <p class="catalog-filter-modal__subtitle">
+        Refine catalog results using filters below
+      </p>
+
       <div class="catalog-filter-divider"></div>
 
       <div class="catalog-filter-block">
@@ -360,10 +389,10 @@
 
       <div class="catalog-language-modal__search">
         <img src="assets/images/catalog/search-icon-dark.svg" alt="" />
-        <input 
+        <input
           type="text"
           [(ngModel)]="languageSearchKeyword"
-          placeholder="Search language" 
+          placeholder="Search language"
         />
       </div>
 
