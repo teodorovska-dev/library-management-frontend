@@ -67,6 +67,8 @@ export class UserProfileComponent {
   readonly favoriteBooksVisibleCount = 4;
   readonly favoriteBooksStep = 2;
 
+  totalUsers = 0;
+
   constructor(
     private fb: FormBuilder,
     public router: Router,
@@ -266,6 +268,7 @@ export class UserProfileComponent {
   private loadDashboardStats(): void {
     this.dashboardService.getStats().subscribe({
       next: stats => {
+        console.log('Dashboard stats:', stats);
         this.dashboardStats = this.mapDashboardStats(stats);
         this.cdr.detectChanges();
       },
@@ -277,6 +280,9 @@ export class UserProfileComponent {
   }
 
   private mapDashboardStats(stats: AdminDashboardStats): DashboardStat[] {
+    
+    this.totalUsers = stats.totalUsers?.value || 0;
+
     return [
       {
         label: 'Total books',

@@ -17,6 +17,7 @@ export interface AdminDashboardStats {
   totalAuthors: DashboardTrendStat;
   writtenOffBooks: DashboardTrendStat;
   availableCopies: DashboardTrendStat;
+  totalUsers: DashboardTrendStat;
 }
 
 @Injectable({
