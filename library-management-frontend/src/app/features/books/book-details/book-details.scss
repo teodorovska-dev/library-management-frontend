@@ -112,11 +112,9 @@ p {
   width: 620px;
   height: 560px;
   background: var(--splash-color, #d8ddd2);
-
   mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
   -webkit-mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
-
-  filter: brightness(1.2);
+  filter: saturate(1.45) brightness(1.18);
   opacity: 0.95;
   pointer-events: none;
 }

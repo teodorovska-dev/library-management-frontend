@@ -16,8 +16,8 @@ interface CatalogBook {
   author: string;
   year: number;
   status: 'Available' | 'Not available';
-  category: string;
-  language: string;
+  categories: string[];
+  languages: string[];
   coverUrl: string;
   splashColor: string;
 }
@@ -218,8 +218,8 @@ export class CatalogComponent implements OnInit, OnDestroy {
       author: book.authorFullName,
       year: book.publicationYear,
       status: book.status === 'AVAILABLE' ? 'Available' : 'Not available',
-      category: book.genre || 'General',
-      language: book.language || 'Unknown',
+      categories: book.genres?.length ? book.genres : ['General'],
+      languages: book.languages?.length ? book.languages : ['Unknown'],
       coverUrl: this.resolveCoverUrl(book.coverImageUrl),
       splashColor: book.splashColor || '#d8ddd2'
     };

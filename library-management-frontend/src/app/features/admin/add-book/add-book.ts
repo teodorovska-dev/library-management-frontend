@@ -23,23 +23,87 @@ export class AddBookComponent {
   isSubmitting = false;
   activeModal: AddBookModalType = null;
 
-  readonly languageOptions: MultiSelectOption[] = [
-    { label: 'English', value: 'English' },
-    { label: 'Ukrainian', value: 'Ukrainian' },
-    { label: 'Polish', value: 'Polish' },
-    { label: 'German', value: 'German' },
-    { label: 'French', value: 'French' },
-  ];
+readonly languageOptions: MultiSelectOption[] = [
+  { label: 'English', value: 'English' },
+  { label: 'Ukrainian', value: 'Ukrainian' },
+  { label: 'Polish', value: 'Polish' },
+  { label: 'German', value: 'German' },
+  { label: 'French', value: 'French' },
+  { label: 'Spanish', value: 'Spanish' },
+  { label: 'Italian', value: 'Italian' },
+  { label: 'Portuguese', value: 'Portuguese' },
+  { label: 'Dutch', value: 'Dutch' },
+  { label: 'Swedish', value: 'Swedish' },
+  { label: 'Norwegian', value: 'Norwegian' },
+  { label: 'Danish', value: 'Danish' },
+  { label: 'Finnish', value: 'Finnish' },
+  { label: 'Czech', value: 'Czech' },
+  { label: 'Slovak', value: 'Slovak' },
+  { label: 'Hungarian', value: 'Hungarian' },
+  { label: 'Romanian', value: 'Romanian' },
+  { label: 'Bulgarian', value: 'Bulgarian' },
+  { label: 'Greek', value: 'Greek' },
+  { label: 'Turkish', value: 'Turkish' },
+  { label: 'Arabic', value: 'Arabic' },
+  { label: 'Hebrew', value: 'Hebrew' },
+  { label: 'Chinese', value: 'Chinese' },
+  { label: 'Japanese', value: 'Japanese' },
+  { label: 'Korean', value: 'Korean' },
+  { label: 'Hindi', value: 'Hindi' },
+];
 
-  readonly categoryOptions: MultiSelectOption[] = [
-    { label: 'Fiction', value: 'Fiction' },
-    { label: 'Fantasy', value: 'Fantasy' },
-    { label: 'Science', value: 'Science' },
-    { label: 'History', value: 'History' },
-    { label: 'Biography', value: 'Biography' },
-    { label: 'Romance', value: 'Romance' },
-    { label: 'Programming', value: 'Programming' },
-  ];
+readonly categoryOptions: MultiSelectOption[] = [
+  { label: 'Fiction', value: 'Fiction' },
+  { label: 'Non-Fiction', value: 'Non-Fiction' },
+  { label: 'Fantasy', value: 'Fantasy' },
+  { label: 'Science Fiction', value: 'Science Fiction' },
+  { label: 'Mystery', value: 'Mystery' },
+  { label: 'Thriller', value: 'Thriller' },
+  { label: 'Romance', value: 'Romance' },
+  { label: 'Horror', value: 'Horror' },
+  { label: 'Adventure', value: 'Adventure' },
+  { label: 'Historical Fiction', value: 'Historical Fiction' },
+
+  { label: 'Biography', value: 'Biography' },
+  { label: 'Autobiography', value: 'Autobiography' },
+  { label: 'Memoir', value: 'Memoir' },
+
+  { label: 'Science', value: 'Science' },
+  { label: 'Physics', value: 'Physics' },
+  { label: 'Mathematics', value: 'Mathematics' },
+  { label: 'Chemistry', value: 'Chemistry' },
+  { label: 'Biology', value: 'Biology' },
+
+  { label: 'Technology', value: 'Technology' },
+  { label: 'Programming', value: 'Programming' },
+  { label: 'Computer Science', value: 'Computer Science' },
+  { label: 'Artificial Intelligence', value: 'Artificial Intelligence' },
+  { label: 'Data Science', value: 'Data Science' },
+
+  { label: 'Business', value: 'Business' },
+  { label: 'Economics', value: 'Economics' },
+  { label: 'Finance', value: 'Finance' },
+  { label: 'Marketing', value: 'Marketing' },
+
+  { label: 'Self-Development', value: 'Self-Development' },
+  { label: 'Psychology', value: 'Psychology' },
+  { label: 'Philosophy', value: 'Philosophy' },
+
+  { label: 'History', value: 'History' },
+  { label: 'Politics', value: 'Politics' },
+
+  { label: 'Education', value: 'Education' },
+  { label: 'Art', value: 'Art' },
+  { label: 'Design', value: 'Design' },
+  { label: 'Photography', value: 'Photography' },
+
+  { label: 'Health', value: 'Health' },
+  { label: 'Fitness', value: 'Fitness' },
+  { label: 'Cooking', value: 'Cooking' },
+
+  { label: 'Travel', value: 'Travel' },
+  { label: 'Children', value: 'Children' },
+];
 
   constructor(
     private fb: FormBuilder,

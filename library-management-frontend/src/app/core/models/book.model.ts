@@ -4,8 +4,8 @@ export interface Book {
   authorFullName: string;
   publicationYear: number;
   copiesCount: number;
-  genre: string;
-  language: string;
+  genres: string[];
+  languages: string[];
   isbn: string;
   publisher: string;
   description: string;

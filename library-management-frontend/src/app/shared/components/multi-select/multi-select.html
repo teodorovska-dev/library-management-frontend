@@ -21,6 +21,15 @@
       (focus)="isOpen = true"
     />
 
+    <button
+      *ngIf="searchTerm"
+      type="button"
+      class="multi-select__search-clear"
+      (click)="clearSearch($event)"
+    >
+      ×
+    </button>
+
     <div class="multi-select__right">
       <button
         *ngIf="selectedCount > 0"

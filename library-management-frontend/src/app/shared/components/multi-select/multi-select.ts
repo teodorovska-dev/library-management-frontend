@@ -1,6 +1,4 @@
-import {
-  CommonModule,
-} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   Component,
   ElementRef,
@@ -73,14 +71,14 @@ export class MultiSelectComponent implements ControlValueAccessor {
   }
 
   get filteredOptions(): MultiSelectOption[] {
-    const normalized = this.searchTerm.trim().toLowerCase();
+    const normalizedSearchTerm = this.searchTerm.trim().toLowerCase();
 
-    if (!normalized) {
+    if (!normalizedSearchTerm) {
       return this.options;
     }
 
     return this.options.filter(option =>
-      option.label.toLowerCase().includes(normalized)
+      option.label.toLowerCase().includes(normalizedSearchTerm)
     );
   }
 
@@ -89,11 +87,20 @@ export class MultiSelectComponent implements ControlValueAccessor {
   }
 
   get allSelected(): boolean {
-    return this.options.length > 0 && this.selectedValues.length === this.options.length;
+    return (
+      this.filteredOptions.length > 0 &&
+      this.filteredOptions.every(option =>
+        this.selectedValues.includes(option.value)
+      )
+    );
   }
 
   get someSelected(): boolean {
-    return this.selectedValues.length > 0 && !this.allSelected;
+    return (
+      this.filteredOptions.some(option =>
+        this.selectedValues.includes(option.value)
+      ) && !this.allSelected
+    );
   }
 
   get selectedLabels(): string[] {
@@ -111,11 +118,24 @@ export class MultiSelectComponent implements ControlValueAccessor {
     this.onTouched();
   }
 
+  openDropdown(): void {
+    if (this.disabled) {
+      return;
+    }
+
+    this.isOpen = true;
+    this.onTouched();
+  }
+
   closeDropdown(): void {
     this.isOpen = false;
   }
 
   toggleOption(value: string): void {
+    if (this.disabled) {
+      return;
+    }
+
     if (this.selectedValues.includes(value)) {
       this.selectedValues = this.selectedValues.filter(item => item !== value);
     } else {
@@ -126,10 +146,20 @@ export class MultiSelectComponent implements ControlValueAccessor {
   }
 
   toggleSelectAll(): void {
+    if (this.disabled || this.filteredOptions.length === 0) {
+      return;
+    }
+
+    const filteredValues = this.filteredOptions.map(option => option.value);
+
     if (this.allSelected) {
-      this.selectedValues = [];
+      this.selectedValues = this.selectedValues.filter(
+        value => !filteredValues.includes(value)
+      );
     } else {
-      this.selectedValues = this.options.map(option => option.value);
+      this.selectedValues = Array.from(
+        new Set([...this.selectedValues, ...filteredValues])
+      );
     }
 
     this.propagateChanges();
@@ -137,9 +167,25 @@ export class MultiSelectComponent implements ControlValueAccessor {
 
   clearSelection(event?: MouseEvent): void {
     event?.stopPropagation();
+
+    if (this.disabled) {
+      return;
+    }
+
     this.selectedValues = [];
     this.searchTerm = '';
     this.propagateChanges();
+  }
+
+  clearSearch(event: MouseEvent): void {
+    event.stopPropagation();
+
+    if (this.disabled) {
+      return;
+    }
+
+    this.searchTerm = '';
+    this.isOpen = true;
   }
 
   isSelected(value: string): boolean {
@@ -155,6 +201,7 @@ export class MultiSelectComponent implements ControlValueAccessor {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as Node;
+
     if (!this.elementRef.nativeElement.contains(target)) {
       this.closeDropdown();
     }
