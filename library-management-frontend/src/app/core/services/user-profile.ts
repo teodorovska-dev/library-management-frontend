@@ -41,4 +41,8 @@ export class UserProfileService {
 
   return this.http.post<UserProfileResponse>(`${this.apiUrl}/me/avatar`, formData);
 }
+
+deleteAvatar(): Observable<UserProfileResponse> {
+  return this.http.delete<UserProfileResponse>(`${this.apiUrl}/me/avatar`);
+}
 }

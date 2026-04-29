@@ -389,6 +389,34 @@
   position: relative;
   margin-top: 8px;
 
+  &__remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 5;
+    width: 29px;
+    height: 29px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: rgb(0, 0, 0);
+    color: #ffffff;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.636);
+  }
+
+  span {
+  transform: translateY(1px); 
+}
+}
+
   input {
     display: none;
   }

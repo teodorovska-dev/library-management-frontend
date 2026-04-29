@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { of, switchMap } from 'rxjs';
@@ -53,7 +53,8 @@ export class EditBookComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
-    private booksService: BooksService
+    private booksService: BooksService,
+    private cdr: ChangeDetectorRef
   ) {
     this.editBookForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(120)]],
@@ -84,9 +85,27 @@ export class EditBookComponent implements OnInit {
     this.loadBookData();
   }
 
+  onRemoveCover(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.selectedCoverName = '';
+    this.coverPreviewUrl = null;
+    this.selectedCoverFile = null;
+
+    this.currentCoverImageUrl = '';
+    this.currentSplashColor = '#d8ddd2';
+
+    this.editBookForm.patchValue({ cover: null });
+    this.cdr.detectChanges();
+  }
+
   private loadBookData(): void {
     this.booksService.getBookById(this.bookId).subscribe({
-      next: book => this.patchForm(book),
+      next: book => {
+        this.patchForm(book);
+        this.cdr.detectChanges();
+      },
       error: error => {
         console.error('Failed to load book:', error);
         this.router.navigate(['/catalog']);
@@ -152,9 +171,12 @@ export class EditBookComponent implements OnInit {
     this.editBookForm.patchValue({ cover: file });
 
     const reader = new FileReader();
+
     reader.onload = () => {
       this.coverPreviewUrl = reader.result as string;
+      this.cdr.detectChanges();
     };
+
     reader.readAsDataURL(file);
   }
 
@@ -162,10 +184,12 @@ export class EditBookComponent implements OnInit {
     if (this.editBookForm.invalid) {
       this.editBookForm.markAllAsTouched();
       this.openModal('validation-error');
+      this.cdr.detectChanges();
       return;
     }
 
     this.isSubmitting = true;
+    this.cdr.detectChanges();
 
     const upload$ = this.selectedCoverFile
       ? this.booksService.uploadBookCover(this.selectedCoverFile)
@@ -188,11 +212,13 @@ export class EditBookComponent implements OnInit {
         next: () => {
           this.isSubmitting = false;
           this.openModal('success');
+          this.cdr.detectChanges();
         },
         error: error => {
           console.error('Failed to update book:', error);
           this.isSubmitting = false;
           this.openModal('validation-error');
+          this.cdr.detectChanges();
         }
       });
   }
@@ -231,6 +257,7 @@ export class EditBookComponent implements OnInit {
 
   onDeleteBook(): void {
     this.openModal('delete-confirm');
+    this.cdr.detectChanges();
   }
 
   confirmDeleteBook(): void {
@@ -242,6 +269,7 @@ export class EditBookComponent implements OnInit {
       error: error => {
         console.error('Failed to write off book:', error);
         this.closeModal();
+        this.cdr.detectChanges();
       }
     });
   }
@@ -256,6 +284,10 @@ export class EditBookComponent implements OnInit {
     this.selectedCoverName = '';
     this.coverPreviewUrl = null;
     this.selectedCoverFile = null;
+    this.currentCoverImageUrl = '';
+    this.currentSplashColor = '#d8ddd2';
+
+    this.cdr.detectChanges();
   }
 
   openModal(type: EditBookModalType): void {
@@ -264,6 +296,7 @@ export class EditBookComponent implements OnInit {
 
   closeModal(): void {
     this.activeModal = null;
+    this.cdr.detectChanges();
   }
 
   onSuccessOk(): void {

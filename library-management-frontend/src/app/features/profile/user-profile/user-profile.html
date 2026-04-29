@@ -58,8 +58,21 @@
                 />
 
                 <span class="profile-card__avatar-overlay" *ngIf="isEditing">
-                  Change photo
-                </span>
+  <ng-container *ngIf="avatarPreviewUrl !== 'assets/images/profile/user-icon.svg'; else uploadAvatarText">
+    <span>Change</span>
+    <button
+      type="button"
+      class="profile-card__avatar-remove"
+      (click)="onRemoveAvatar($event)"
+    >
+      Remove
+    </button>
+  </ng-container>
+
+  <ng-template #uploadAvatarText>
+    <span>Upload photo</span>
+  </ng-template>
+</span>
               </label>
 
               <h3>{{ fullName }}</h3>

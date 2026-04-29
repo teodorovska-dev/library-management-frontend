@@ -46,6 +46,15 @@
                     (change)="onCoverSelected($event)"
                   />
 
+                  <button
+                    type="button"
+                    class="cover-upload__remove"
+                    *ngIf="coverPreviewUrl"
+                    (click)="onRemoveCover($event)"
+                  >
+                    ×
+                  </button>
+
                   <ng-container *ngIf="!coverPreviewUrl; else coverPreview">
                     <div class="cover-upload__placeholder">
                       <img src="assets/images/admin/upload-icon.svg" alt="" />

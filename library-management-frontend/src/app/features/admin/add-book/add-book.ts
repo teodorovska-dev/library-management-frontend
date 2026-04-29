@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { switchMap, of } from 'rxjs';
+import { of, switchMap } from 'rxjs';
 import { BooksService } from '../../../core/services/books';
 import { MultiSelectComponent, MultiSelectOption } from '../../../shared/components/multi-select/multi-select';
-import { CoverColorService } from '../../../core/services/cover-color';
 
 type AddBookModalType = 'validation-error' | 'success' | null;
 
@@ -46,7 +45,7 @@ export class AddBookComponent {
     private fb: FormBuilder,
     private router: Router,
     private booksService: BooksService,
-    private coverColorService: CoverColorService
+    private cdr: ChangeDetectorRef
   ) {
     this.addBookForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(120)]],
@@ -95,9 +94,12 @@ export class AddBookComponent {
     this.addBookForm.patchValue({ cover: file });
 
     const reader = new FileReader();
+
     reader.onload = () => {
       this.coverPreviewUrl = reader.result as string;
+      this.cdr.detectChanges();
     };
+
     reader.readAsDataURL(file);
   }
 
@@ -105,59 +107,77 @@ export class AddBookComponent {
     if (this.addBookForm.invalid) {
       this.addBookForm.markAllAsTouched();
       this.openModal('validation-error');
+      this.cdr.detectChanges();
       return;
     }
 
     this.isSubmitting = true;
+    this.cdr.detectChanges();
 
     const upload$ = this.selectedCoverFile
       ? this.booksService.uploadBookCover(this.selectedCoverFile)
-      : of({ url: '' });
+      : of({
+          url: '',
+          splashColor: '#d8ddd2'
+        });
 
     upload$
       .pipe(
-        switchMap(async uploadResponse => {
-          const splashColor = await this.coverColorService.extractDominantColor(
-          this.coverPreviewUrl || uploadResponse.url
+        switchMap(uploadResponse => {
+          const request = this.mapFormToBookRequest(
+            uploadResponse.url,
+            uploadResponse.splashColor
           );
 
-          const request = this.mapFormToBookRequest(uploadResponse.url, splashColor);
-          return this.booksService.createBook(request).toPromise();
+          return this.booksService.createBook(request);
         })
       )
       .subscribe({
         next: () => {
           this.isSubmitting = false;
           this.openModal('success');
+          this.cdr.detectChanges();
         },
         error: error => {
           console.error('Failed to create book:', error);
           this.isSubmitting = false;
           this.openModal('validation-error');
+          this.cdr.detectChanges();
         }
       });
   }
 
-private mapFormToBookRequest(coverImageUrl: string, splashColor: string) {
-  const value = this.addBookForm.value;
+  onRemoveCover(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
 
-  const selectedLanguages = value.languages as string[];
-  const selectedCategories = value.category as string[];
+    this.selectedCoverName = '';
+    this.coverPreviewUrl = null;
+    this.selectedCoverFile = null;
 
-  return {
-    title: value.title.trim(),
-    authorFullName: value.author.trim(),
-    publicationYear: Number(value.publicationYear),
-    copiesCount: Number(value.availableCopies),
-    genre: selectedCategories[0],
-    language: selectedLanguages[0],
-    isbn: value.isbn.trim(),
-    publisher: value.publisher.trim(),
-    description: value.description.trim(),
-    coverImageUrl,
-    splashColor
-  };
-}
+    this.addBookForm.patchValue({ cover: null });
+    this.cdr.detectChanges();
+  }
+
+  private mapFormToBookRequest(coverImageUrl: string, splashColor: string) {
+    const value = this.addBookForm.value;
+    const selectedLanguages = value.languages as string[];
+    const selectedCategories = value.category as string[];
+
+    return {
+      title: value.title.trim(),
+      authorFullName: value.author.trim(),
+      publicationYear: Number(value.publicationYear),
+      copiesCount: Number(value.availableCopies),
+      genre: selectedCategories[0],
+      language: selectedLanguages[0],
+      isbn: value.isbn.trim(),
+      publisher: value.publisher.trim(),
+      description: value.description.trim(),
+      coverImageUrl,
+      splashColor
+    };
+  }
 
   openModal(type: AddBookModalType): void {
     this.activeModal = type;
@@ -165,6 +185,7 @@ private mapFormToBookRequest(coverImageUrl: string, splashColor: string) {
 
   closeModal(): void {
     this.activeModal = null;
+    this.cdr.detectChanges();
   }
 
   onSuccessOk(): void {
@@ -182,6 +203,8 @@ private mapFormToBookRequest(coverImageUrl: string, splashColor: string) {
     this.selectedCoverName = '';
     this.coverPreviewUrl = null;
     this.selectedCoverFile = null;
+
+    this.cdr.detectChanges();
   }
 
   onCancel(): void {

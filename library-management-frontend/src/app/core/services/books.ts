@@ -15,6 +15,7 @@ export interface BookFilterParams {
 
 export interface FileUploadResponse {
   url: string;
+  splashColor: string;
 }
 
 @Injectable({

@@ -49,6 +49,7 @@ export class UserProfileComponent {
   isAdmin = false;
   isEditing = false;
   isSaving = false;
+  isAvatarMarkedForRemoval = false;
 
   activeModal: ProfileModalType = null;
 
@@ -173,6 +174,7 @@ export class UserProfileComponent {
         });
 
         this.avatarPreviewUrl = this.resolveAvatarUrl(user.avatarUrl);
+        this.isAvatarMarkedForRemoval = false;
 
         this.tokenService.updateUserData({
           userId: user.userId,
@@ -268,7 +270,6 @@ export class UserProfileComponent {
   private loadDashboardStats(): void {
     this.dashboardService.getStats().subscribe({
       next: stats => {
-        console.log('Dashboard stats:', stats);
         this.dashboardStats = this.mapDashboardStats(stats);
         this.cdr.detectChanges();
       },
@@ -280,7 +281,6 @@ export class UserProfileComponent {
   }
 
   private mapDashboardStats(stats: AdminDashboardStats): DashboardStat[] {
-    
     this.totalUsers = stats.totalUsers?.value || 0;
 
     return [
@@ -341,16 +341,35 @@ export class UserProfileComponent {
 
     this.selectedAvatarFile = file;
     this.selectedAvatarName = file.name;
+    this.isAvatarMarkedForRemoval = false;
     this.profileForm.patchValue({ avatar: file });
 
     const reader = new FileReader();
 
     reader.onload = () => {
       this.avatarPreviewUrl = reader.result as string;
+      this.isAvatarMarkedForRemoval = false;
       this.cdr.detectChanges();
     };
 
     reader.readAsDataURL(file);
+  }
+
+  onRemoveAvatar(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!this.isEditing) {
+      return;
+    }
+
+    this.avatarPreviewUrl = 'assets/images/profile/user-icon.svg';
+    this.selectedAvatarFile = null;
+    this.selectedAvatarName = '';
+    this.isAvatarMarkedForRemoval = true;
+
+    this.profileForm.patchValue({ avatar: null });
+    this.cdr.detectChanges();
   }
 
   onSaveChanges(): void {
@@ -378,6 +397,11 @@ export class UserProfileComponent {
       next: user => {
         if (this.selectedAvatarFile) {
           this.uploadAvatarAfterProfileSave();
+          return;
+        }
+
+        if (this.isAvatarMarkedForRemoval) {
+          this.deleteAvatarAfterProfileSave();
           return;
         }
 
@@ -413,6 +437,21 @@ export class UserProfileComponent {
     });
   }
 
+  private deleteAvatarAfterProfileSave(): void {
+    this.userProfileService.deleteAvatar().subscribe({
+      next: user => {
+        this.finishSuccessfulProfileSave(user);
+      },
+      error: error => {
+        console.error('Failed to delete avatar:', error);
+        this.isSaving = false;
+        this.profileErrorMessage = 'Profile was updated, but avatar removal failed.';
+        this.openModal('validation-error');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   private finishSuccessfulProfileSave(user: {
     firstName: string;
     lastName: string;
@@ -441,6 +480,7 @@ export class UserProfileComponent {
     this.avatarPreviewUrl = this.resolveAvatarUrl(user.avatarUrl);
     this.selectedAvatarFile = null;
     this.selectedAvatarName = '';
+    this.isAvatarMarkedForRemoval = false;
 
     this.isSaving = false;
     this.isEditing = false;

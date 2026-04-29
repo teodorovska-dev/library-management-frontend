@@ -207,7 +207,22 @@
     color: #ffffff;
     opacity: 0;
     transition: opacity 0.2s ease;
-    pointer-events: none;
+    pointer-events: auto;
+  }
+
+  &__avatar-remove {
+    margin-top: 2px;
+    margin-left: 2px;
+    border: none;
+    background: transparent;
+    padding: 2px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 10px;
+    font-weight: 300;
+    line-height: 1.2;
+    color: #ffffff;
+    text-decoration: underline;
+    cursor: pointer;
   }
 
   &__info {
