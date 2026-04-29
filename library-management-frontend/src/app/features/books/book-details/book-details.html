@@ -40,7 +40,13 @@
         class="book-details-page__hero-visual"
         [style.--splash-color]="book().splashColor"
       >
-        <div class="book-details-page__accent-panel">
+        <div 
+          class="book-details-page__accent-panel"
+          [style.--splash-color]="book().splashColor"
+          [style.--contrast-color]="
+            getContrastColor(book().splashColor) === 'dark' ? '#000000' : '#ffffff'
+            "
+        >
           <div class="book-details-page__splash"></div>
 
           <div class="book-details-page__cover-frame">
