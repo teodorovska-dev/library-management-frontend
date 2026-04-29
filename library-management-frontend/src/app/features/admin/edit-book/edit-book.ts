@@ -367,4 +367,50 @@ readonly categoryOptions: MultiSelectOption[] = [
     this.closeModal();
     this.router.navigate(['/catalog']);
   }
+
+  onDigitsOnlyInput(event: Event, controlName: string, maxLength?: number): void {
+  const input = event.target as HTMLInputElement;
+  let value = input.value.replace(/\D/g, '');
+
+  if (maxLength) {
+    value = value.slice(0, maxLength);
+  }
+
+  input.value = value;
+  this.editBookForm?.get(controlName)?.setValue(value, { emitEvent: false });
+}
+
+onLettersOnlyInput(event: Event, controlName: string): void {
+  const input = event.target as HTMLInputElement;
+  const value = input.value.replace(/[^\p{L}\s.'-]/gu, '');
+
+  input.value = value;
+  this.editBookForm?.get(controlName)?.setValue(value, { emitEvent: false });
+}
+
+onIsbnInput(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const value = input.value.replace(/[^0-9-]/g, '').slice(0, 20);
+
+  input.value = value;
+  this.editBookForm?.get('isbn')?.setValue(value, { emitEvent: false });
+}
+
+getError(controlName: string): string | null {
+  const control = this.editBookForm.get(controlName);
+
+  if (!control || !control.touched || !control.errors) {
+    return null;
+  }
+
+  if (control.errors['required']) return 'This field is required.';
+  if (control.errors['maxlength']) return 'The value is too long.';
+  if (control.errors['min']) return 'The value must be greater than 0.';
+  if (control.errors['pattern']) {
+    if (controlName === 'publicationYear') return 'Publication year must contain exactly 4 digits.';
+    return 'Invalid format.';
+  }
+
+  return 'Invalid value.';
+}
 }

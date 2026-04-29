@@ -22,6 +22,7 @@ export class AddBookComponent {
   selectedCoverFile: File | null = null;
   isSubmitting = false;
   activeModal: AddBookModalType = null;
+  isSubmitted = false;
 
 readonly languageOptions: MultiSelectOption[] = [
   { label: 'English', value: 'English' },
@@ -167,49 +168,53 @@ readonly categoryOptions: MultiSelectOption[] = [
     reader.readAsDataURL(file);
   }
 
-  onSubmit(): void {
-    if (this.addBookForm.invalid) {
-      this.addBookForm.markAllAsTouched();
-      this.openModal('validation-error');
-      this.cdr.detectChanges();
-      return;
-    }
+onSubmit(): void {
+  this.isSubmitted = true;
+  this.addBookForm.markAllAsTouched();
+  this.addBookForm.updateValueAndValidity();
 
-    this.isSubmitting = true;
+  if (this.addBookForm.invalid) {
+    this.isSubmitting = false;
+    this.openModal('validation-error');
     this.cdr.detectChanges();
-
-    const upload$ = this.selectedCoverFile
-      ? this.booksService.uploadBookCover(this.selectedCoverFile)
-      : of({
-          url: '',
-          splashColor: '#d8ddd2'
-        });
-
-    upload$
-      .pipe(
-        switchMap(uploadResponse => {
-          const request = this.mapFormToBookRequest(
-            uploadResponse.url,
-            uploadResponse.splashColor
-          );
-
-          return this.booksService.createBook(request);
-        })
-      )
-      .subscribe({
-        next: () => {
-          this.isSubmitting = false;
-          this.openModal('success');
-          this.cdr.detectChanges();
-        },
-        error: error => {
-          console.error('Failed to create book:', error);
-          this.isSubmitting = false;
-          this.openModal('validation-error');
-          this.cdr.detectChanges();
-        }
-      });
+    return;
   }
+
+  this.isSubmitting = true;
+  this.cdr.detectChanges();
+
+  const upload$ = this.selectedCoverFile
+    ? this.booksService.uploadBookCover(this.selectedCoverFile)
+    : of({
+        url: '',
+        splashColor: '#d8ddd2'
+      });
+
+  upload$
+    .pipe(
+      switchMap(uploadResponse => {
+        const request = this.mapFormToBookRequest(
+          uploadResponse.url,
+          uploadResponse.splashColor
+        );
+
+        return this.booksService.createBook(request);
+      })
+    )
+    .subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.openModal('success');
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error('Failed to create book:', error);
+        this.isSubmitting = false;
+        this.openModal('validation-error');
+        this.cdr.detectChanges();
+      }
+    });
+}
 
   onRemoveCover(event: Event): void {
     event.preventDefault();
@@ -233,8 +238,8 @@ readonly categoryOptions: MultiSelectOption[] = [
       authorFullName: value.author.trim(),
       publicationYear: Number(value.publicationYear),
       copiesCount: Number(value.availableCopies),
-      genre: selectedCategories[0],
-      language: selectedLanguages[0],
+      genres: selectedCategories,
+      languages: selectedLanguages,
       isbn: value.isbn.trim(),
       publisher: value.publisher.trim(),
       description: value.description.trim(),
@@ -274,4 +279,58 @@ readonly categoryOptions: MultiSelectOption[] = [
   onCancel(): void {
     this.router.navigate(['/catalog']);
   }
+
+  onDigitsOnlyInput(event: Event, controlName: string, maxLength?: number): void {
+  const input = event.target as HTMLInputElement;
+  let value = input.value.replace(/\D/g, '');
+
+  if (maxLength) {
+    value = value.slice(0, maxLength);
+  }
+
+  input.value = value;
+  this.addBookForm?.get(controlName)?.setValue(value, { emitEvent: false });
+}
+
+onLettersOnlyInput(event: Event, controlName: string): void {
+  const input = event.target as HTMLInputElement;
+  const value = input.value.replace(/[^\p{L}\s.'-]/gu, '');
+
+  input.value = value;
+  this.addBookForm?.get(controlName)?.setValue(value, { emitEvent: false });
+}
+
+onIsbnInput(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const value = input.value.replace(/[^0-9-]/g, '').slice(0, 20);
+
+  input.value = value;
+  this.addBookForm?.get('isbn')?.setValue(value, { emitEvent: false });
+}
+
+getError(controlName: string): string | null {
+  const control = this.addBookForm.get(controlName);
+
+  if (!control || !control.errors) {
+    return null;
+  }
+
+  if (!control.touched && !control.dirty && !this.isSubmitted) {
+    return null;
+  }
+
+  if (control.hasError('required')) return 'This field is required.';
+  if (control.hasError('maxlength')) return 'The value is too long.';
+  if (control.hasError('min')) return 'The value must be greater than 0.';
+
+  if (control.hasError('pattern')) {
+    if (controlName === 'publicationYear') {
+      return 'Publication year must contain exactly 4 digits.';
+    }
+
+    return 'Invalid format.';
+  }
+
+  return 'Invalid value.';
+}
 }
