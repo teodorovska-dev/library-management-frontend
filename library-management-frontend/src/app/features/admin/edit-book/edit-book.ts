@@ -25,6 +25,8 @@ export class EditBookComponent implements OnInit {
   coverPreviewUrl: string | null = null;
   selectedCoverFile: File | null = null;
   currentCoverImageUrl = '';
+  currentSplashColor = '';
+
   bookId!: number;
   isSubmitting = false;
   activeModal: EditBookModalType = null;
@@ -94,6 +96,7 @@ export class EditBookComponent implements OnInit {
 
   private patchForm(book: Book): void {
     this.currentCoverImageUrl = book.coverImageUrl || '';
+    this.currentSplashColor = book.splashColor || '';
 
     this.editBookForm.patchValue({
       title: book.title,
@@ -166,12 +169,18 @@ export class EditBookComponent implements OnInit {
 
     const upload$ = this.selectedCoverFile
       ? this.booksService.uploadBookCover(this.selectedCoverFile)
-      : of({ url: this.currentCoverImageUrl });
+      : of({
+          url: this.currentCoverImageUrl,
+          splashColor: this.currentSplashColor
+        });
 
     upload$
       .pipe(
         switchMap(uploadResponse => {
-          const request = this.mapFormToBookRequest(uploadResponse.url);
+          const request = this.mapFormToBookRequest(
+            uploadResponse.url,
+            uploadResponse.splashColor
+          );
           return this.booksService.updateBook(this.bookId, request);
         })
       )
@@ -188,7 +197,7 @@ export class EditBookComponent implements OnInit {
       });
   }
 
-  private mapFormToBookRequest(coverImageUrl: string) {
+  private mapFormToBookRequest(coverImageUrl: string, newSplashColor?: string) {
     const value = this.editBookForm.value;
     const selectedLanguages = value.languages as string[];
     const selectedCategories = value.category as string[];
@@ -203,7 +212,8 @@ export class EditBookComponent implements OnInit {
       isbn: value.isbn.trim(),
       publisher: value.publisher.trim(),
       description: value.description.trim(),
-      coverImageUrl
+      coverImageUrl,
+      splashColor: newSplashColor || this.currentSplashColor || '#d8ddd2'
     };
   }
 
