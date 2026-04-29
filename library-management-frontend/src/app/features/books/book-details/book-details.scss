@@ -170,13 +170,17 @@ p {
   overflow: hidden;
   background-color: #000000;
 
-  &__paint {
+&__paint {
   position: absolute;
   z-index: 0;
   pointer-events: none;
-  object-fit: contain;
+  background: var(--book-accent-color, #d8ddd2);
   opacity: 0.95;
-  filter: brightness(0) saturate(100%) invert(85%) sepia(22%) saturate(642%) hue-rotate(285deg) brightness(104%) contrast(103%);
+
+  mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
+  -webkit-mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
+
+  filter: saturate(1.45) brightness(1.18);
 
   &--left {
     top: -105px;
@@ -242,7 +246,8 @@ p {
       font-size: 36px;
       font-weight: 400;
       line-height: 1.02;
-      color: #f4b7df;
+      color: var(--book-accent-color, #d8ddd2);
+      filter: saturate(1.45) brightness(1.18);
       text-transform: uppercase;
     }
 

@@ -476,11 +476,9 @@
     object-fit: contain;
     transform: translate(-50%, -50%);
     background: var(--splash-color, #d8ddd2);
-
     mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
     -webkit-mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
-
-    filter: brightness(1.2);
+    filter: saturate(1.45) brightness(1.18);
     z-index: 1;
     pointer-events: none;
   }

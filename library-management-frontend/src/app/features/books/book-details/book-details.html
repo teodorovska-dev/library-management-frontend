@@ -59,19 +59,15 @@
     </div>
   </div>
 
-  <section id="about-book-section" class="about-book-section">
+  <section 
+    id="about-book-section" 
+    class="about-book-section"
+    [style.--book-accent-color]="book().splashColor"
+  >
 
-   <img
-    class="about-book-section__paint about-book-section__paint--left"
-    src="assets/images/shared/book-splash-mask.png"
-    alt=""
-  />
+    <div class="about-book-section__paint about-book-section__paint--left"></div>
 
-  <img
-    class="about-book-section__paint about-book-section__paint--right"
-    src="assets/images/shared/book-splash-mask.png"
-    alt=""
-  />
+    <div class="about-book-section__paint about-book-section__paint--right"></div>
 
     <div class="about-book-section__container">
       <div class="about-book-section__header">

@@ -241,7 +241,7 @@
     background: var(--splash-color, #d8ddd2);
     mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
     -webkit-mask: url('/assets/images/shared/book-splash-mask.png') center / contain no-repeat;
-    filter: brightness(1.2);
+    filter: saturate(1.45) brightness(1.18);
     z-index: 1;
     pointer-events: none;
   }
@@ -252,7 +252,7 @@
     width: 176px;
     height: 264px;
     object-fit: cover;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.36);
+    box-shadow: 0 16px 10px rgba(0, 0, 0, 0.36);
   }
 
   &__info {
