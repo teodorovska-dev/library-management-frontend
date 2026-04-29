@@ -292,22 +292,28 @@
 
           <div class="home-footer__contact-item">
             <img src="assets/images/home/location-icon.svg" alt="" />
-            <span>12 Shevchenka St., Apt. 45<br />Lviv, Ukraine</span>
+                <span>
+                  {{ contacts.address[0] }}<br />
+                  {{ contacts.address[1] }}
+                </span>
           </div>
 
           <div class="home-footer__contact-item">
             <img src="assets/images/home/phone-icon.svg" alt="" />
-            <span>+380 50 123 45 67</span>
+            <span>{{ contacts.phone }}</span>
           </div>
 
           <div class="home-footer__contact-item">
             <img src="assets/images/home/mail-icon.svg" alt="" />
-            <span>info&#64;librarysystem.com</span>
+            <span>{{ contacts.email }}</span>
           </div>
 
           <div class="home-footer__contact-item">
             <img src="assets/images/home/clock-icon.svg" alt="" />
-            <span>Mon – Fri: 9:00 AM – 6:00 PM<br />Sat – Sun: Closed</span>
+            <span>
+              {{ contacts.workingHours[0] }}<br />
+              {{ contacts.workingHours[1] }}
+             </span>
           </div>
         </div>
 

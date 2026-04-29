@@ -3,6 +3,7 @@ import { NgFor, NgIf } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { BooksService } from '../../core/services/books';
 import { Book } from '../../core/models/book.model';
+import { CONTACTS } from '../../core/config/contact.config';
 
 interface TrendingBook {
   id: number;
@@ -43,6 +44,8 @@ export class HomeComponent implements OnInit {
 
   isTrendingLoading = false;
   hasTrendingError = false;
+
+  contacts = CONTACTS;
 
   constructor(
     private booksService: BooksService,
