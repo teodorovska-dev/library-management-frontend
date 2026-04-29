@@ -13,11 +13,6 @@
         class="book-details-page__hero-splash book-details-page__hero-splash--bottom"
       />
 
-      <img
-        src="assets/images/shared/book-splash-white.png"
-        alt=""
-        class="book-details-page__hero-splash book-details-page__hero-splash--right"
-      />
 
       <div class="book-details-page__hero-content">
         <h1>
@@ -41,32 +36,44 @@
         </button>
       </div>
 
-      <div class="book-details-page__hero-visual">
-        <div
-          class="book-details-page__splash"
-          [style.--splash-color]="book().splashColor"
-        ></div>
+      <div
+        class="book-details-page__hero-visual"
+        [style.--splash-color]="book().splashColor"
+      >
+        <div class="book-details-page__accent-panel">
+          <div class="book-details-page__splash"></div>
 
-        <div class="book-details-page__cover-frame">
-          <img
-            [src]="book().coverImage"
-            [alt]="book().title + ' cover'"
-            class="book-details-page__cover-image"
-            (error)="onCoverError()"
-          />
+          <div class="book-details-page__cover-frame">
+            <img
+              [src]="book().coverImage"
+              [alt]="book().title + ' cover'"
+              class="book-details-page__cover-image"
+              (error)="onCoverError()"
+            />
+          </div>
+
+          <div class="book-details-page__book-meta">
+            <h3>{{ book().title }}</h3>
+
+            <div class="book-details-page__book-meta-row">
+              <span>By {{ book().author }}</span>
+              <span>•</span>
+              <span>{{ book().publicationYear }}</span>
+              <span>•</span>
+              <span>{{ book().status }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <section 
-    id="about-book-section" 
+  <section
+    id="about-book-section"
     class="about-book-section"
     [style.--book-accent-color]="book().splashColor"
   >
-
     <div class="about-book-section__paint about-book-section__paint--left"></div>
-
     <div class="about-book-section__paint about-book-section__paint--right"></div>
 
     <div class="about-book-section__container">
@@ -162,7 +169,10 @@
       </div>
 
       <div class="about-book-section__footer">
-        <div class="about-book-section__footer-actions" *ngIf="isUser() || isAdmin()">
+        <div
+          class="about-book-section__footer-actions"
+          *ngIf="isUser() || isAdmin()"
+        >
           <button
             *ngIf="isUser()"
             type="button"
