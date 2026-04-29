@@ -24,6 +24,7 @@
     <div class="user-profile-page__shell">
 
       <img
+        *ngIf="isAdmin"
         class="user-profile-page__paint user-profile-page__paint--bottom-right"
         src="assets/images/shared/book-splash-white.png"
         alt=""
@@ -156,34 +157,50 @@
             <p>Keep track of the books you saved for later reading.</p>
           </div>
 
-          <div class="favorite-books">
-            <article class="favorite-book-card" *ngFor="let book of favoriteBooks" (click)="onOpenFavoriteBook(book.id)">
-              <div class="favorite-book-card__cover-wrap">
-                <img
-                  class="favorite-book-card__cover"
-                  [src]="book.coverUrl"
-                  [alt]="book.title"
-                />
+<div class="favorite-books-wrapper">
+  <div class="favorite-books">
+    <article
+      class="favorite-book-card"
+      *ngFor="let book of visibleFavoriteBooks"
+      (click)="onOpenFavoriteBook(book.id)"
+    >
+      <div class="favorite-book-card__cover-wrap">
+        <img
+          class="favorite-book-card__cover"
+          [src]="book.coverUrl"
+          [alt]="book.title"
+        />
 
-                <img
-                  class="favorite-book-card__splash"
-                  [style.--splash-color]="book.splashColor"
-                />
-              </div>
+        <div
+          class="favorite-book-card__splash"
+          [style.--splash-color]="book.splashColor"
+        ></div>
+      </div>
 
-              <div class="favorite-book-card__content">
-                <h3>{{ book.title }}</h3>
+      <div class="favorite-book-card__content">
+        <h3>{{ book.title }}</h3>
 
-                <p>
-                  By {{ book.author }}
-                  <span>•</span>
-                  {{ book.year }}
-                  <span>•</span>
-                  {{ book.status }}
-                </p>
-              </div>
-            </article>
-          </div>
+        <p>
+          By {{ book.author }}
+          <span>•</span>
+          {{ book.year }}
+          <span>•</span>
+          {{ book.status }}
+        </p>
+      </div>
+    </article>
+  </div>
+
+  <div class="favorite-books-controls" *ngIf="canSlideFavoriteBooks">
+    <button type="button" aria-label="Previous favorites" (click)="showPreviousFavoriteBooks()">
+      <img src="assets/images/shared/arrow-icon.svg" alt="" />
+    </button>
+
+    <button type="button" aria-label="Next favorites" (click)="showNextFavoriteBooks()">
+      <img src="assets/images/shared/arrow-icon.svg" alt="" />
+    </button>
+  </div>
+</div>
         </div>
 
         <div class="admin-dashboard-panel" *ngIf="isAdmin">

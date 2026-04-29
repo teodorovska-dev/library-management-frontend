@@ -4,6 +4,15 @@
   background: transparent;
   border-bottom: none;
 
+.navbar__inner,
+.navbar__actions,
+.navbar__button,
+.navbar__profile,
+.navbar__profile-button {
+  position: relative;
+  z-index: 10000;
+}
+
   &__inner {
     max-width: 1500px;
     margin: 0 auto;
@@ -70,10 +79,10 @@
     &--outline {
       color: #111111;
       border: 1px solid #111111;
-      background: transparent;
+      background: #ffffff;
 
       &:hover {
-        background: rgba(0, 0, 0, 0.04);
+        background: #f5f5f5;
       }
     }
 

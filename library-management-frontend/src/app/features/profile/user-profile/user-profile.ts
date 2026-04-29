@@ -63,6 +63,10 @@ export class UserProfileComponent {
   dashboardStats: DashboardStat[] = [];
   favoriteBooks: FavoriteBook[] = [];
 
+  favoriteBooksStartIndex = 0;
+  readonly favoriteBooksVisibleCount = 4;
+  readonly favoriteBooksStep = 2;
+
   constructor(
     private fb: FormBuilder,
     public router: Router,
@@ -82,6 +86,17 @@ export class UserProfileComponent {
 
     this.initializeProfile();
     this.profileForm.disable();
+  }
+
+  get visibleFavoriteBooks(): FavoriteBook[] {
+    return this.favoriteBooks.slice(
+      this.favoriteBooksStartIndex,
+      this.favoriteBooksStartIndex + this.favoriteBooksVisibleCount
+    );
+  }
+
+  get canSlideFavoriteBooks(): boolean {
+    return this.favoriteBooks.length > this.favoriteBooksVisibleCount;
   }
 
   get fullName(): string {
@@ -109,6 +124,38 @@ export class UserProfileComponent {
   get isStatusInvalid(): boolean {
     const control = this.profileForm.get('status');
     return !!control && control.invalid && control.touched;
+  }
+
+  showNextFavoriteBooks(): void {
+    if (!this.canSlideFavoriteBooks) {
+      return;
+    }
+
+    const maxStartIndex = Math.max(
+      this.favoriteBooks.length - this.favoriteBooksVisibleCount,
+      0
+    );
+
+    this.favoriteBooksStartIndex =
+      this.favoriteBooksStartIndex + this.favoriteBooksStep > maxStartIndex
+        ? 0
+        : this.favoriteBooksStartIndex + this.favoriteBooksStep;
+  }
+
+  showPreviousFavoriteBooks(): void {
+    if (!this.canSlideFavoriteBooks) {
+      return;
+    }
+
+    const maxStartIndex = Math.max(
+      this.favoriteBooks.length - this.favoriteBooksVisibleCount,
+      0
+    );
+
+    this.favoriteBooksStartIndex =
+      this.favoriteBooksStartIndex - this.favoriteBooksStep < 0
+        ? maxStartIndex
+        : this.favoriteBooksStartIndex - this.favoriteBooksStep;
   }
 
   private initializeProfile(): void {
@@ -172,6 +219,7 @@ export class UserProfileComponent {
   private loadFavorites(): void {
     if (this.isAdmin) {
       this.favoriteBooks = [];
+      this.favoriteBooksStartIndex = 0;
       this.cdr.detectChanges();
       return;
     }
@@ -179,11 +227,13 @@ export class UserProfileComponent {
     this.favoritesService.getFavorites().subscribe({
       next: books => {
         this.favoriteBooks = books.map(book => this.mapBookToFavoriteBook(book));
+        this.favoriteBooksStartIndex = 0;
         this.cdr.detectChanges();
       },
       error: error => {
         console.error('Failed to load favorite books:', error);
         this.favoriteBooks = [];
+        this.favoriteBooksStartIndex = 0;
         this.cdr.detectChanges();
       }
     });
@@ -211,24 +261,6 @@ export class UserProfileComponent {
     }
 
     return coverImageUrl;
-  }
-
-  private getSplashUrl(genre?: string): string {
-    const normalizedGenre = genre?.toLowerCase() ?? '';
-
-    if (normalizedGenre.includes('romance')) {
-      return 'assets/images/profile/splash-pink.svg';
-    }
-
-    if (normalizedGenre.includes('finance') || normalizedGenre.includes('psychology')) {
-      return 'assets/images/profile/splash-green.svg';
-    }
-
-    if (normalizedGenre.includes('mystery') || normalizedGenre.includes('classic')) {
-      return 'assets/images/profile/splash-white.svg';
-    }
-
-    return 'assets/images/profile/splash-orange.svg';
   }
 
   private loadDashboardStats(): void {
