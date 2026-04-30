@@ -243,7 +243,7 @@ onToggleFavorite(): void {
   });
 }
 
-getContrastColor(hex: string): 'light' | 'dark' {
+getContrastColor(hex: string): '#000000' | '#ffffff' {
   const color = hex.replace('#', '');
 
   const r = parseInt(color.substring(0, 2), 16);
@@ -252,6 +252,14 @@ getContrastColor(hex: string): 'light' | 'dark' {
 
   const brightness = (r * 299 + g * 587 + b * 114) / 1000;
 
-  return brightness > 160 ? 'dark' : 'light';
+  if (brightness > 200) {
+    return '#000000'; 
+  }
+
+  if (brightness > 140) {
+    return '#ffffff';  
+  }
+
+  return '#ffffff'; 
 }
 }
