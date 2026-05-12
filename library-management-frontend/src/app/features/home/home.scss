@@ -464,7 +464,7 @@
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 100px;
-    align-items: end;
+    align-items: start;
   }
 
   &__controls {
@@ -647,7 +647,7 @@
     flex-wrap: wrap;
     gap: 10px;
     font-family: 'Kanit', sans-serif;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 300;
     line-height: 1.45;
     color: rgba(255, 255, 255, 0.86);

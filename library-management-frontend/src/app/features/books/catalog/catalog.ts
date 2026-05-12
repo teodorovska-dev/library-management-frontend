@@ -6,6 +6,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { TokenService } from '../../../core/services/token';
 import { BooksService } from '../../../core/services/books';
 import { Book } from '../../../core/models/book.model';
+import { environment } from '../../../../environments/environment';
 
 type SortField = 'year' | 'author' | 'title';
 type SortDirection = 'asc' | 'desc';
@@ -225,17 +226,17 @@ export class CatalogComponent implements OnInit, OnDestroy {
     };
   }
 
-  private resolveCoverUrl(coverImageUrl?: string): string {
-    if (!coverImageUrl || coverImageUrl.includes('example.com')) {
-      return 'assets/images/catalog/book-psychology-money.png';
-    }
-
-    if (coverImageUrl.startsWith('/uploads')) {
-      return `http://localhost:8082${coverImageUrl}`;
-    }
-
-    return coverImageUrl;
+private resolveCoverUrl(coverImageUrl?: string): string {
+  if (!coverImageUrl || coverImageUrl.includes('example.com')) {
+    return 'assets/images/catalog/book-psychology-money.png';
   }
+
+  if (coverImageUrl.startsWith('/uploads')) {
+    return `${environment.apiBaseUrl.replace('/api', '')}${coverImageUrl}`;
+  }
+
+  return coverImageUrl;
+}
 
   onCoverError(book: CatalogBook): void {
     book.coverUrl = 'assets/images/catalog/book-psychology-money.png';

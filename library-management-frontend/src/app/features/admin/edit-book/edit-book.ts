@@ -9,6 +9,7 @@ import {
   MultiSelectComponent,
   MultiSelectOption
 } from '../../../shared/components/multi-select/multi-select';
+import { environment } from '../../../../environments/environment';
 
 type EditBookModalType = 'delete-confirm' | 'validation-error' | 'success' | null;
 
@@ -313,7 +314,7 @@ readonly categoryOptions: MultiSelectOption[] = [
     }
 
     if (coverImageUrl.startsWith('/uploads')) {
-      return `http://localhost:8082${coverImageUrl}`;
+      return `${environment.apiBaseUrl.replace('/api', '')}${coverImageUrl}`;
     }
 
     return coverImageUrl;

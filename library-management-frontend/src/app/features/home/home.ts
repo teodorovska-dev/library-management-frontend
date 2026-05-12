@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { BooksService } from '../../core/services/books';
 import { Book } from '../../core/models/book.model';
 import { CONTACTS } from '../../core/config/contact.config';
+import { environment } from '../../../environments/environment';
 
 interface TrendingBook {
   id: number;
@@ -131,7 +132,7 @@ export class HomeComponent implements OnInit {
     }
 
     if (coverImageUrl.startsWith('/uploads')) {
-      return `http://localhost:8082${coverImageUrl}`;
+      return `${environment.apiBaseUrl.replace('/api', '')}${coverImageUrl}`;
     }
 
     return coverImageUrl;

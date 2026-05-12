@@ -5,6 +5,7 @@ import { TokenService } from '../../../core/services/token';
 import { BooksService } from '../../../core/services/books';
 import { Book } from '../../../core/models/book.model';
 import { FavoritesService } from '../../../core/services/favorites';
+import { environment } from '../../../../environments/environment';
 
 
 type BookDetailsModalType = 'delete-confirm' | null;
@@ -125,17 +126,17 @@ export class BookDetailsComponent {
     };
   }
 
-  private resolveCoverUrl(coverImageUrl?: string): string {
-    if (!coverImageUrl || coverImageUrl.includes('example.com')) {
-      return 'assets/images/books/book-details-cover.png';
-    }
-
-    if (coverImageUrl.startsWith('/uploads')) {
-      return `http://localhost:8082${coverImageUrl}`;
-    }
-
-    return coverImageUrl;
+private resolveCoverUrl(coverImageUrl?: string): string {
+  if (!coverImageUrl || coverImageUrl.includes('example.com')) {
+    return 'assets/images/books/book-details-cover.png';
   }
+
+  if (coverImageUrl.startsWith('/uploads')) {
+    return `${environment.apiBaseUrl.replace('/api', '')}${coverImageUrl}`;
+  }
+
+  return coverImageUrl;
+}
 
   onCoverError(): void {
     this.book.update(current => ({
