@@ -17,18 +17,30 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     req.url.includes('/auth/verify-reset-code') ||
     req.url.includes('/auth/reset-password');
 
-  const authReq =
-    token && !isAuthRequest
-      ? req.clone({
-          setHeaders: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-      : req;
+  const isPublicGetRequest =
+    req.method === 'GET' &&
+    (
+      req.url.includes('/api/books') ||
+      req.url.includes('/books') ||
+      req.url.includes('/uploads')
+    );
+
+  const shouldAttachToken =
+    !!token &&
+    !isAuthRequest &&
+    !isPublicGetRequest;
+
+  const authReq = shouldAttachToken
+    ? req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+    : req;
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !isAuthRequest) {
+      if ((error.status === 401 || error.status === 403) && shouldAttachToken) {
         tokenService.clear();
         router.navigate(['/login']);
       }

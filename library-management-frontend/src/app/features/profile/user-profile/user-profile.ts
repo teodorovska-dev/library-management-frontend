@@ -8,6 +8,7 @@ import { FavoritesService } from '../../../core/services/favorites';
 import { Book } from '../../../core/models/book.model';
 import { DashboardService, AdminDashboardStats } from '../../../core/services/dashboard';
 import { UserProfileService } from '../../../core/services/user-profile';
+import { environment } from '../../../../environments/environment';
 
 type ProfileModalType = 'success' | 'validation-error' | 'logout-confirm' | null;
 type DashboardTrend = 'increase' | 'decrease' | 'neutral';
@@ -261,7 +262,7 @@ export class UserProfileComponent {
     }
 
     if (coverImageUrl.startsWith('/uploads')) {
-      return `http://localhost:8082${coverImageUrl}`;
+      return `${environment.apiBaseUrl.replace('/api', '')}${coverImageUrl}`;
     }
 
     return coverImageUrl;
@@ -350,7 +351,7 @@ export class UserProfileComponent {
       this.avatarPreviewUrl = reader.result as string;
       this.isAvatarMarkedForRemoval = false;
       this.cdr.detectChanges();
-    };
+  };
 
     reader.readAsDataURL(file);
   }
@@ -497,7 +498,7 @@ export class UserProfileComponent {
     }
 
     if (avatarUrl.startsWith('/uploads')) {
-      return `http://localhost:8082${avatarUrl}`;
+      return `${environment.apiBaseUrl.replace('/api', '')}${avatarUrl}`;
     }
 
     return avatarUrl;
