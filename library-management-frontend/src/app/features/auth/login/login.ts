@@ -1,7 +1,14 @@
 import { Component } from '@angular/core';
 import { NgIf } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
+
 import { AuthService } from '../../../core/services/auth';
 
 @Component({
@@ -97,7 +104,13 @@ export class LoginComponent {
         password: formValue.password
       },
       formValue.rememberMe
-    ).subscribe({
+    )
+    .pipe(
+      finalize(() => {
+        this.isSubmitting = false;
+      })
+    )
+    .subscribe({
       next: (response) => {
         if (response.role === 'ADMIN') {
           this.router.navigate(['/admin/dashboard']);
@@ -105,31 +118,42 @@ export class LoginComponent {
           this.router.navigate(['/catalog']);
         }
       },
+
       error: (err) => {
         const validationErrors = err?.error?.validationErrors;
 
         if (validationErrors) {
           this.applyBackendValidationErrors(validationErrors);
-          this.errorMessage = err?.error?.message || 'Validation error occurred.';
-        } else if (err?.status === 401 || err?.status === 403 || err?.status === 500) {
-          this.errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-        } else {
-          this.errorMessage = err?.error?.message || 'Login failed. Please try again.';
-        }
 
-        this.isSubmitting = false;
-      },
-      complete: () => {
-        this.isSubmitting = false;
+          this.errorMessage =
+            err?.error?.message || 'Validation error occurred.';
+        } else if (
+          err?.status === 401 ||
+          err?.status === 403 ||
+          err?.status === 500
+        ) {
+          this.errorMessage =
+            'Invalid email or password. Please check your credentials and try again.';
+        } else {
+          this.errorMessage =
+            err?.error?.message || 'Login failed. Please try again.';
+        }
       }
     });
   }
 
-  private applyBackendValidationErrors(errors: Record<string, string>): void {
+  private applyBackendValidationErrors(
+    errors: Record<string, string>
+  ): void {
     Object.entries(errors).forEach(([field, message]) => {
       const control = this.loginForm.get(field);
+
       if (control) {
-        control.setErrors({ ...(control.errors || {}), backend: message });
+        control.setErrors({
+          ...(control.errors || {}),
+          backend: message
+        });
+
         control.markAsTouched();
       }
     });
@@ -138,12 +162,18 @@ export class LoginComponent {
   private clearBackendErrors(): void {
     ['email', 'password'].forEach(field => {
       const control = this.loginForm.get(field);
+
       if (!control?.errors?.['backend']) {
         return;
       }
 
       const { backend, ...remainingErrors } = control.errors || {};
-      control.setErrors(Object.keys(remainingErrors).length ? remainingErrors : null);
+
+      control.setErrors(
+        Object.keys(remainingErrors).length
+          ? remainingErrors
+          : null
+      );
     });
   }
 }
