@@ -111,8 +111,10 @@ export class LoginComponent {
         if (validationErrors) {
           this.applyBackendValidationErrors(validationErrors);
           this.errorMessage = err?.error?.message || 'Validation error occurred.';
+        } else if (err?.status === 401 || err?.status === 403 || err?.status === 500) {
+          this.errorMessage = 'Invalid email or password. Please check your credentials and try again.';
         } else {
-          this.errorMessage = err?.error?.message || 'Login failed.';
+          this.errorMessage = err?.error?.message || 'Login failed. Please try again.';
         }
 
         this.isSubmitting = false;
