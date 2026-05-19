@@ -242,6 +242,8 @@ onSubmit(): void {
       languages: selectedLanguages,
       isbn: value.isbn.trim(),
       publisher: value.publisher.trim(),
+      format: value.format.trim(),
+      features: value.features.trim(),
       description: value.description.trim(),
       coverImageUrl,
       splashColor

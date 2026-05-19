@@ -8,6 +8,8 @@ export interface Book {
   languages: string[];
   isbn: string;
   publisher: string;
+  format: string;
+  features: string;
   description: string;
   coverImageUrl: string;
   splashColor?: string;
