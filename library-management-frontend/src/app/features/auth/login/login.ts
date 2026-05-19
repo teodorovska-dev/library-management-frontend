@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { NgIf } from '@angular/common';
 import {
   FormBuilder,
@@ -7,7 +7,6 @@ import {
   Validators
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth';
 
@@ -26,12 +25,56 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]],
       rememberMe: [true]
+    });
+  }
+
+  onSubmit(): void {
+    this.errorMessage = '';
+    this.clearBackendErrors();
+
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.cdr.detectChanges();
+
+    const formValue = this.loginForm.getRawValue();
+
+    this.authService.login(
+      {
+        email: formValue.email.trim().toLowerCase(),
+        password: formValue.password
+      },
+      formValue.rememberMe
+    ).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+
+        if (response.role === 'ADMIN') {
+          this.router.navigate(['/admin/dashboard']);
+        } else {
+          this.router.navigate(['/catalog']);
+        }
+      },
+      error: () => {
+        this.errorMessage =
+          'Invalid email or password. Please check your credentials and try again.';
+
+        this.isSubmitting = false;
+        this.loginForm.get('password')?.setErrors({ backend: 'Invalid password.' });
+        this.loginForm.get('password')?.markAsTouched();
+
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -47,116 +90,23 @@ export class LoginComponent {
 
   getEmailErrorMessage(): string {
     const control = this.loginForm.get('email');
+    if (!control) return '';
 
-    if (!control) {
-      return '';
-    }
-
-    if (control.hasError('backend')) {
-      return control.getError('backend');
-    }
-
-    if (control.hasError('required')) {
-      return 'Email is required.';
-    }
-
-    if (control.hasError('email')) {
-      return 'Please enter a valid email address.';
-    }
+    if (control.hasError('backend')) return control.getError('backend');
+    if (control.hasError('required')) return 'Email is required.';
+    if (control.hasError('email')) return 'Please enter a valid email address.';
 
     return '';
   }
 
   getPasswordErrorMessage(): string {
     const control = this.loginForm.get('password');
+    if (!control) return '';
 
-    if (!control) {
-      return '';
-    }
-
-    if (control.hasError('backend')) {
-      return control.getError('backend');
-    }
-
-    if (control.hasError('required')) {
-      return 'Password is required.';
-    }
+    if (control.hasError('backend')) return control.getError('backend');
+    if (control.hasError('required')) return 'Password is required.';
 
     return '';
-  }
-
-  onSubmit(): void {
-    this.errorMessage = '';
-    this.clearBackendErrors();
-
-    if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched();
-      return;
-    }
-
-    this.isSubmitting = true;
-
-    const formValue = this.loginForm.getRawValue();
-
-    this.authService.login(
-      {
-        email: formValue.email.trim().toLowerCase(),
-        password: formValue.password
-      },
-      formValue.rememberMe
-    )
-    .pipe(
-      finalize(() => {
-        this.isSubmitting = false;
-      })
-    )
-    .subscribe({
-      next: (response) => {
-        if (response.role === 'ADMIN') {
-          this.router.navigate(['/admin/dashboard']);
-        } else {
-          this.router.navigate(['/catalog']);
-        }
-      },
-
-      error: (err) => {
-        const validationErrors = err?.error?.validationErrors;
-
-        if (validationErrors) {
-          this.applyBackendValidationErrors(validationErrors);
-
-          this.errorMessage =
-            err?.error?.message || 'Validation error occurred.';
-        } else if (
-          err?.status === 401 ||
-          err?.status === 403 ||
-          err?.status === 500
-        ) {
-          this.errorMessage =
-            'Invalid email or password. Please check your credentials and try again.';
-        } else {
-          this.errorMessage =
-            err?.error?.message || 'Login failed. Please try again.';
-        }
-      }
-    });
-  }
-
-  private applyBackendValidationErrors(
-    errors: Record<string, string>
-  ): void {
-    Object.entries(errors).forEach(([field, message]) => {
-      const control = this.loginForm.get(field);
-
-      if (control) {
-        control.setErrors({
-          ...(control.errors || {}),
-          backend: message
-        });
-
-        control.markAsTouched();
-      }
-    });
   }
 
   private clearBackendErrors(): void {
@@ -168,12 +118,7 @@ export class LoginComponent {
       }
 
       const { backend, ...remainingErrors } = control.errors || {};
-
-      control.setErrors(
-        Object.keys(remainingErrors).length
-          ? remainingErrors
-          : null
-      );
+      control.setErrors(Object.keys(remainingErrors).length ? remainingErrors : null);
     });
   }
 }
