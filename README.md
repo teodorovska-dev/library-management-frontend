@@ -18,7 +18,7 @@ The application supports authenticated and non-authenticated users, dynamic cata
 
 ### Frontend
 ```text
-https://library-management-frontend-three-eosin.vercel.app
+https://library-management-frontend-teodorovska-devs-projects.vercel.app
 ```
 
 ### Backend API
